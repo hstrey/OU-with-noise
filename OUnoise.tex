@@ -1,0 +1,90 @@
+% ****** Start of file OUnoise.tex ******
+%%
+\documentclass[%
+ reprint,
+%superscriptaddress,
+%groupedaddress,
+%unsortedaddress,
+%runinaddress,
+%frontmatterverbose, 
+%preprint,
+%showpacs,preprintnumbers,
+%nofootinbib,
+%nobibnotes,
+%bibnotes,
+ amsmath,amssymb,
+ aps,
+%pra,
+%prb,
+%rmp,
+%prstab,
+%prstper,
+%floatfix,
+]{revtex4-1}
+
+\usepackage{graphicx}% Include figure files
+\usepackage{dcolumn}% Align table columns on decimal point
+\usepackage{bm}% bold math
+\usepackage{subcaption}
+\usepackage{float}
+%\usepackage{hyperref}% add hypertext capabilities
+%\usepackage[mathlines]{lineno}% Enable numbering of text and display math
+%\linenumbers\relax % Commence numbering lines
+
+%\usepackage[showframe,%Uncomment any one of the following lines to test 
+%%scale=0.7, marginratio={1:1, 2:3}, ignoreall,% default settings
+%%text={7in,10in},centering,
+%%margin=1.5in,
+%%total={6.5in,8.75in}, top=1.2in, left=0.9in, includefoot,
+%%height=10in,a5paper,hmargin={3cm,0.8in},
+%]{geometry}
+\DeclareMathOperator\erf{erf}
+\DeclareMathOperator\erfc{erfc}
+\begin{document}
+
+\preprint{APS/123-QED}
+
+\title{Parameter estimation from an Ornstein-Uhlenbeck process with measurement noise}
+
+\author{Helmut H. Strey}
+ \affiliation{Biomedical Engineering Department and Laufer Center for Physical and Quantitative Biology, Stony Brook University, Stony Brook NY 11794-5281.}%Lines break automatically or can be forced with \\
+
+\date{\today}% It is always \today, today,
+             %  but any date may be explicitly specified
+
+\begin{abstract}
+\begin{description}
+\item[PACS numbers]
+May be entered using the \verb+\pacs{#1}+ command.
+\end{description}
+\end{abstract}
+
+\pacs{Valid PACS appear here}% PACS, the Physics and Astronomy
+                             % Classification Scheme.
+%\keywords{Suggested keywords}%Use showkeys class option if keyword
+                              %display desired
+\maketitle
+
+%\tableofcontents
+\onecolumngrid
+\subsection{Introduction}
+\subsection{Probabilistic Description of Processes}
+A probabilistic description of an overdamped Brownian particle in a harmonic potential (also called Ornstein-Uhlenbeck process) was first reported by Ornstein and Uhlenbeck in 1930 \cite{RN28}
+\begin{equation}\label{OUp}
+p\left( {x,\Delta t\left| {x_0} \right.} \right) = \frac{1}{{\sqrt {2\pi A(1-B^{2}(\Delta t))} }}\exp \left( { - \frac{{{{\left( {x - {x_0}B(\Delta t)} \right)}^2}}}{{2A(1-B^{2}(\Delta t))}}} \right)
+\end{equation}
+with $B(\Delta t) = \exp \left( { - \frac{\Delta t}{\tau}} \right)$.
+This equation describes the conditional probability of finding a particle at time $t+\Delta t$ at $x$ given that it was at $x0$ at time $t$.  The likelihood function for a specific time trace $\left\{x_i(i\Delta t)\right\}$ is:
+\begin{equation}
+	p\left( \left\{x_i(t_i)\right\} \left| B, A \right.\right) =
+	\frac{1}{\sqrt {2 \pi A} }
+	\exp \left( { - \frac{{x_1}^2}{2A}}\right)
+	\frac{1}{{\sqrt {2\pi A(1-B^{2}(\Delta t))}^{(N-1)} }}
+	\exp \left( { - \sum\limits_{i=1}^{N-1}\frac{{{{\left( {x_{i+1} - {x_i}B(\Delta t)} \right)}^2}}}{{2A(1-B^{2}(\Delta t))}}} \right)
+\end{equation}
+\subsection{Implementation of the Estimation Maximization algorithm}
+\begin{acknowledgments}
+We wish to acknowledge funding by the 
+\end{acknowledgments}
+
+\end{document}

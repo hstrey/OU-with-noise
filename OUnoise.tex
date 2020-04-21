@@ -103,12 +103,18 @@ But since we don't observe $\{x_{i}\}$, we need to marginalize over $\{x_{i}\}$:
 \begin{equation}
 p\left( \{y_{i}\}|A,B,\sigma_{N}\right) = \idotsint p\left( \{x_{i}\},\{y_{i}\}|A,B,\sigma_{N}\right) \,dx_1 \dots dx_N
 \end{equation}
-Using Bayes Theorem, we can express the conditional probabilities of $\{x_{i}\}$ in terms of the measured data $\{y_{i}\}$ and paramaters $\{A,B,\sigma_{N}\}$.
+Using Bayes Theorem, we can express the conditional probability of the parameters $\{A,B,\sigma_{N}\}$ given the measured data $\{y_{i}\}$.
 \begin{equation}
-	p\left( \{x_{i}\}|\{y_{i}\},\{A,B,\sigma_{N}\}\right) =
-	p\left( \{y_{i}\}|\{x_{i}\},\{A,B,\sigma_{N}\}\right)p\left(\{A,B,\sigma_{N}\}\right)
+	p\left( \{A,B,\sigma_{N}\}|\{y_{i}\},\right) =
+	p\left( \{y_{i}\}|\{A,B,\sigma_{N}\}\right)p\left(\{A,B,\sigma_{N}\}\right)
 \end{equation}
-\subsection{Implementation of the Estimation Maximization algorithm}
+From this equation, we can estimate the parameters from a measurement of $\{y_{i}\}$ using a maximum likelihood approach.
+\subsection{Implementation of the Expectation Maximization algorithm}
+As we can see from the previous equation, a simple maximum likelihood approach is computationally challenging.  Because we are dealing with Gaussian distributions, a typical approach is to take the logarithm of the likelihood and hope that the likelihood factors nicely.  But in our case, because of the marginalization of the hidden variables $\{x_{i}\}$, we are taking the logarithm of integrals over $\{x_{i}\}$ which does not simplify the equation.  On the other hand, we recognize that $p\left( \{x_{i}\},\{y_{i}\}|A,B,\sigma_{N}\right)$ factors nicely.  The Expectation Maximization (EM) algorithm takes advantage of this fact.  The EM algorithm works as follows: (1) pick a starting point for the parameters $\Theta^{old} = \{A^{old},B^{old},\sigma_{N}^{old}\}$; (2) calculate the probability distribution for each hidden variable $\{x_{i}\}$ given these parameters; (3) maximize the following function with respect to the new parameters $\Theta$
+\begin{equation}
+	\mathcal{Q}(\Theta,\Theta^{old}) = \idotsint p\left( \{x_{i}\}|\{y_{i}\},\Theta^{old}\right)\ln p\left( \{x_{i}\},\{y_{i}\}|\Theta\right)\,dx_1 \dots dx_N
+\end{equation}
+
 \begin{acknowledgments}
 We wish to acknowledge funding by the 
 \end{acknowledgments}

@@ -71,16 +71,42 @@ May be entered using the \verb+\pacs{#1}+ command.
 \subsection{Probabilistic Description of Processes}
 A probabilistic description of an overdamped Brownian particle in a harmonic potential (also called Ornstein-Uhlenbeck process) was first reported by Ornstein and Uhlenbeck in 1930 \cite{RN28}
 \begin{equation}\label{OUp}
-p\left( {x,\Delta t\left| {x_0} \right.} \right) = \frac{1}{{\sqrt {2\pi A(1-B^{2}(\Delta t))} }}\exp \left( { - \frac{{{{\left( {x - {x_0}B(\Delta t)} \right)}^2}}}{{2A(1-B^{2}(\Delta t))}}} \right)
+	x_{t+\Delta t} \sim \mathcal{N}(\mu=Bx_{t},\sigma^{2}=A(1-B^{2}))
 \end{equation}
-with $B(\Delta t) = \exp \left( { - \frac{\Delta t}{\tau}} \right)$.
-This equation describes the conditional probability of finding a particle at time $t+\Delta t$ at $x$ given that it was at $x0$ at time $t$.  The likelihood function for a specific time trace $\left\{x_i(i\Delta t)\right\}$ is:
+with $B(\Delta t) = \exp \left( { - \frac{\Delta t}{\tau}} \right)$ and $\mathcal{N}$ as a normal distribution.
+This equation describes the conditional probability of finding a particle at time $t+\Delta t$ at $x_{t+\Delta t}$ given that it was at $x_{t}$ at time $t$.  The likelihood function for a specific time trace $\left\{x_i(i\Delta t)\right\}$ is:
 \begin{equation}
 	p\left( \left\{x_i(t_i)\right\} \left| B, A \right.\right) =
 	\frac{1}{\sqrt {2 \pi A} }
 	\exp \left( { - \frac{{x_1}^2}{2A}}\right)
 	\frac{1}{{\sqrt {2\pi A(1-B^{2}(\Delta t))}^{(N-1)} }}
 	\exp \left( { - \sum\limits_{i=1}^{N-1}\frac{{{{\left( {x_{i+1} - {x_i}B(\Delta t)} \right)}^2}}}{{2A(1-B^{2}(\Delta t))}}} \right)
+\end{equation}
+We now need to introduce measurement noise.  For right now, we will assume Gaussian noise that is added to each data point.  Such noise can be described as follows:
+\begin{equation}
+	y_{i} \sim \mathcal{N}(\mu=x_{i},\sigma=\sigma_{N})
+\end{equation}
+with likelihood function for $\{y_{i}\}$ given $\{x_{i}\}$ and $\sigma_{N}$:
+\begin{equation}
+	p\left( \left\{y_i(t_i)\right\} \left| \left\{x_i(t_i)\right\},\sigma_{N} \right.\right) =
+	\frac{1}{{\sqrt {2\pi \sigma_{N}^{2}}^{N} }}
+	\exp \left( { - \sum\limits_{i=1}^{N}\frac{{{{\left( {y_{i} - x_{i}B(\Delta t)} \right)}^2}}}{{2\sigma^{2}}}} \right)
+\end{equation}
+
+Since we are measuring $\{y_{i}\}$, $\{x_{i}\}$ are latent variables.  If we knew $\{x_{i}\}$ and $\{y_{i}\}$ the likelihood function would simply be.
+\begin{equation}
+	p\left( \{x_{i}\},\{y_{i}\}|A,B,\sigma_{N}\right) = 
+	p\left( \left\{y_i(t_i)\right\} \left| \left\{x_i(t_i)\right\},\sigma_{N} \right.\right)
+	p\left( \left\{x_i(t_i)\right\} \left| B, A \right.\right)
+\end{equation}
+But since we don't observe $\{x_{i}\}$, we need to marginalize over $\{x_{i}\}$:
+\begin{equation}
+p\left( \{y_{i}\}|A,B,\sigma_{N}\right) = \idotsint p\left( \{x_{i}\},\{y_{i}\}|A,B,\sigma_{N}\right) \,dx_1 \dots dx_N
+\end{equation}
+Using Bayes Theorem, we can express the conditional probabilities of $\{x_{i}\}$ in terms of the measured data $\{y_{i}\}$ and paramaters $\{A,B,\sigma_{N}\}$.
+\begin{equation}
+	p\left( \{x_{i}\}|\{y_{i}\},\{A,B,\sigma_{N}\}\right) =
+	p\left( \{y_{i}\}|\{x_{i}\},\{A,B,\sigma_{N}\}\right)p\left(\{A,B,\sigma_{N}\}\right)
 \end{equation}
 \subsection{Implementation of the Estimation Maximization algorithm}
 \begin{acknowledgments}

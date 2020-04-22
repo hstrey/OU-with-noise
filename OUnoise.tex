@@ -27,6 +27,8 @@
 \usepackage{bm}% bold math
 \usepackage{subcaption}
 \usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{calc,arrows.meta,positioning}
 %\usepackage{hyperref}% add hypertext capabilities
 %\usepackage[mathlines]{lineno}% Enable numbering of text and display math
 %\linenumbers\relax % Commence numbering lines
@@ -99,6 +101,48 @@ Since we are measuring $\{y_{i}\}$, $\{x_{i}\}$ are latent variables.  If we kne
 	p\left( \left\{y_i(t_i)\right\} \left| \left\{x_i(t_i)\right\},\sigma_{N} \right.\right)
 	p\left( \left\{x_i(t_i)\right\} \left| B, A \right.\right)
 \end{equation}
+\begin{figure}[H]
+\begin{center}
+\tikzset{
+   every node/.style={font=\sffamily\small},
+   main node/.style={thick,circle,draw,font=\sffamily\Large}
+}
+\begin{tikzpicture}[->,>={Stealth[round,sep]},shorten >=1pt,auto,node distance=2.5cm]
+\node[main node,minimum size=1.5cm] (1) {$x_{1}$};
+\node[main node,minimum size=1.5cm] (2) [right of=1] {$x_{2}$};
+\node[main node,minimum size=1.5cm] (4) [right of=2] {$x_{n-1}$};
+\node[main node,minimum size=1.5cm] (5) [right of=4] {$x_{n}$};
+\node[main node,minimum size=1.5cm] (6) [right of=5] {$x_{n+1}$};
+\node[main node,minimum size=1.5cm] (8) [right of=6] {$x_{N-1}$};
+\node[main node,minimum size=1.5cm] (9) [right of=8] {$x_{N}$};
+\node at ($(2)!.5!(4)$) {\ldots};
+\node at ($(6)!.5!(8)$) {\ldots};
+
+\node[main node,minimum size=1.5cm] (10) [below of=1] {$y_{1}$};
+\node[main node,minimum size=1.5cm] (11) [below of=2] {$y_{2}$};
+\node[main node,minimum size=1.5cm] (12) [below of=4] {$y_{n-1}$};
+\node[main node,minimum size=1.5cm] (13) [below of=5] {$y_{n}$};
+\node[main node,minimum size=1.5cm] (14) [below of=6] {$y_{n-1}$};
+\node[main node,minimum size=1.5cm] (15) [below of=8] {$y_{N-1}$};
+\node[main node,minimum size=1.5cm] (16) [below of=9] {$y_{N}$};
+
+\draw [->] (1) -- (2);
+%\draw (2) -- (4);
+\draw [->] (4) -- (5);
+\draw [->] (5) -- (6);
+\draw [->] (8) -- (9);
+
+\draw [->] (1) -- (10);
+\draw [->] (2) -- (11);
+\draw [->] (4) -- (12);
+\draw [->] (5) -- (13);
+\draw [->] (6) -- (14);
+\draw [->] (8) -- (15);
+\draw [->] (9) -- (16);
+\end{tikzpicture}
+\end{center}
+\end{figure}
+
 But since we don't observe $\{x_{i}\}$, we need to marginalize over $\{x_{i}\}$:
 \begin{equation}
 p\left( \{y_{i}\}|A,B,\sigma_{N}\right) = \idotsint p\left( \{x_{i}\},\{y_{i}\}|A,B,\sigma_{N}\right) \,dx_1 \dots dx_N
@@ -130,7 +174,7 @@ using the following definition
 	\beta(x_{n})&=p(y_{n+1},\dots,y_{N}|x_{n},\Theta^{old})
 	\end{aligned}
 \end{equation}
-here we took advantage of the properties of the Markov chain $\{x_{i}\}$.  If we know a specific $x_{n}$ then the $y_{i}$ with $i\leq n$ are independent of $y_{i}$ with $i>n$.
+here we took advantage of the properties of the Markov chain $\{x_{i}\}$.  If we know a specific $x_{n}$ then $x_{n-1}$ and $x_{n+1}$ are independent because the path is blocked.  As a consequence of that, the $y_{i}$ with $i\leq n$ are independent of $y_{i}$ with $i>n$.
 \begin{acknowledgments}
 We wish to acknowledge funding by the 
 \end{acknowledgments}

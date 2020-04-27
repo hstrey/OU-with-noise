@@ -101,30 +101,31 @@ Since we are measuring $\{y_{i}\}$, $\{x_{i}\}$ are latent variables.  If we kne
 	p\left( \left\{y_i(t_i)\right\} \left| \left\{x_i(t_i)\right\},\sigma_{N} \right.\right)
 	p\left( \left\{x_i(t_i)\right\} \left| B, A \right.\right)
 \end{equation}
+
 \begin{figure}[H]
 \begin{center}
 \tikzset{
    every node/.style={font=\sffamily\small},
    main node/.style={thick,circle,draw,font=\sffamily\Large}
 }
-\begin{tikzpicture}[->,>={Stealth[round,sep]},shorten >=1pt,auto,node distance=2.5cm]
-\node[main node,minimum size=1.5cm] (1) {$x_{1}$};
-\node[main node,minimum size=1.5cm] (2) [right of=1] {$x_{2}$};
-\node[main node,minimum size=1.5cm] (4) [right of=2] {$x_{n-1}$};
-\node[main node,minimum size=1.5cm] (5) [right of=4] {$x_{n}$};
-\node[main node,minimum size=1.5cm] (6) [right of=5] {$x_{n+1}$};
-\node[main node,minimum size=1.5cm] (8) [right of=6] {$x_{N-1}$};
-\node[main node,minimum size=1.5cm] (9) [right of=8] {$x_{N}$};
+\begin{tikzpicture}[->,>={Stealth[round,sep]},shorten >=1pt,auto,node distance=2.5cm,minimum size=1.5cm]
+\node[main node] (1) {$x_{1}$};
+\node[main node] (2) [right of=1] {$x_{2}$};
+\node[main node] (4) [right of=2] {$x_{n-1}$};
+\node[main node] (5) [right of=4] {$x_{n}$};
+\node[main node] (6) [right of=5] {$x_{n+1}$};
+\node[main node] (8) [right of=6] {$x_{N-1}$};
+\node[main node] (9) [right of=8] {$x_{N}$};
 \node at ($(2)!.5!(4)$) {\ldots};
 \node at ($(6)!.5!(8)$) {\ldots};
 
-\node[main node,minimum size=1.5cm] (10) [below of=1] {$y_{1}$};
-\node[main node,minimum size=1.5cm] (11) [below of=2] {$y_{2}$};
-\node[main node,minimum size=1.5cm] (12) [below of=4] {$y_{n-1}$};
-\node[main node,minimum size=1.5cm] (13) [below of=5] {$y_{n}$};
-\node[main node,minimum size=1.5cm] (14) [below of=6] {$y_{n-1}$};
-\node[main node,minimum size=1.5cm] (15) [below of=8] {$y_{N-1}$};
-\node[main node,minimum size=1.5cm] (16) [below of=9] {$y_{N}$};
+\node[main node] (10) [below of=1] {$y_{1}$};
+\node[main node] (11) [below of=2] {$y_{2}$};
+\node[main node] (12) [below of=4] {$y_{n-1}$};
+\node[main node] (13) [below of=5] {$y_{n}$};
+\node[main node] (14) [below of=6] {$y_{n-1}$};
+\node[main node] (15) [below of=8] {$y_{N-1}$};
+\node[main node] (16) [below of=9] {$y_{N}$};
 
 \draw [->] (1) -- (2);
 %\draw (2) -- (4);
@@ -140,6 +141,7 @@ Since we are measuring $\{y_{i}\}$, $\{x_{i}\}$ are latent variables.  If we kne
 \draw [->] (8) -- (15);
 \draw [->] (9) -- (16);
 \end{tikzpicture}
+\caption{Graph representation of a chain of N values $\{x_{i}\}$ that originate from an OU process with corresponding $\{y_{i}\}$ that represent the measured values containing noise}\label{fig:HMCnodesfig}
 \end{center}
 \end{figure}
 
@@ -152,14 +154,14 @@ Using Bayes Theorem, we can express the conditional probability of the parameter
 	p\left( \{A,B,\sigma_{N}\}|\{y_{i}\},\right) =
 	p\left( \{y_{i}\}|A,B,\sigma_{N}\right)p\left(A,B,\sigma_{N}\right)
 \end{equation}
-From this equation, we can estimate the parameters from a measurement of $\{y_{i}\}$ using a maximum likelihood approach.
+In principle, from this equation, we could estimate the parameters from a measurement of $\{y_{i}\}$ using a maximum likelihood approach.
 \subsection{Implementation of the Expectation Maximization algorithm}
 As we can see from the previous equation, a simple maximum likelihood approach is computationally challenging.  Because we are dealing with Gaussian distributions, a typical approach is to take the logarithm of the likelihood and hope that the likelihood factors nicely.  But in our case, because of the marginalization of the hidden variables $\{x_{i}\}$, we are taking the logarithm of integrals over $\{x_{i}\}$ which does not simplify the equation.  On the other hand, we recognize that $p\left( \{x_{i}\},\{y_{i}\}|A,B,\sigma_{N}\right)$ factors nicely.  The Expectation Maximization (EM) algorithm takes advantage of this fact.  The EM algorithm works as follows: (1) pick a starting point for the parameters $\Theta^{old} = \{A^{old},B^{old},\sigma_{N}^{old}\}$; (2) calculate the probability distribution for each hidden variable $\{x_{i}\}$ given these parameters; (3) maximize the following function with respect to $\Theta$ to find the new parameters.
 \begin{equation}
 	\mathcal{Q}(\Theta,\Theta^{old}) = \idotsint p\left( \{x_{i}\}|\{y_{i}\},\Theta^{old}\right)\ln p\left( \{x_{i}\},\{y_{i}\}|\Theta\right)\,dx_1 \dots dx_N
 \end{equation}
 (4) repeat by using $\Theta$ as $\Theta_{old}$ until convergence.  The EM alorithm converges, but it may find local maxima in the posterior distribution.  Therefore it is important to vary the starting point for $\Theta$.  To evaluate the integral in eq., we need to calculate $p\left( x_{n}|\{y_{i}\},\Theta^{old}\right)$.  We can again use Bayes rule and the conditional indpendence rules of a linear hidden Markov chain:
-\begin{equation}
+\begin{equation}\label{margxn}
 	\begin{aligned}
 	p\left( x_{n}|\{y_{i}\},\Theta^{old}\right)&=\frac{p\left( \{y_{i}\}|x_{n},\Theta^{old}\right)p(x_{n})}{p(\{y_{i}\}|\Theta^{old})}\\
 	&=\frac{p(y_{1},\dots,y_{n}|x_{n},\Theta^{old})p(y_{n+1},\dots,y_{N}|x_{n},\Theta^{old})p(x_{n})}{p(\{y_{i}\}|\Theta^{old})}\\
@@ -174,7 +176,67 @@ using the following definition
 	\beta(x_{n})&=p(y_{n+1},\dots,y_{N}|x_{n},\Theta^{old})
 	\end{aligned}
 \end{equation}
-here we took advantage of the properties of the Markov chain $\{x_{i}\}$.  If we know a specific $x_{n}$ then $x_{n-1}$ and $x_{n+1}$ are independent because the path is blocked.  As a consequence of that, the $y_{i}$ with $i\leq n$ are independent of $y_{i}$ with $i>n$.
+here we took advantage of the properties of the Markov chain $\{x_{i}\}$.  If we know a specific $x_{n}$ then $x_{n-1}$ and $x_{n+1}$ are independent because the path between the two is blocked.  As a consequence of that, the $y_{i}$ with $i\leq n$ are independent of $y_{i}$ with $i>n$ conditioned on $x_{n}$.  Both $\alpha(x_{n})$ and $\beta(x_{n})$ can be defined and calculated recursively:
+\begin{equation}
+	\begin{aligned}
+	\alpha(x_{n})&=p(y_{n}|x_{n},\Theta^{old})\int \alpha(x_{n-1})p(x_{n}|x_{n-1},\Theta^{old})dx_{n-1}\\
+	\beta(x_{n})&=\int \beta(x_{n+1})p(y_{n+1}|x_{n+1},\Theta^{old})p(x_{n+1}|x_{n},\Theta^{old})dx_{n+1}
+	\end{aligned}
+\end{equation}
+with the starting value of
+\begin{equation}
+	\begin{aligned}
+\alpha(x_{1})&\propto \exp \left( { - \frac{{x_1}^2}{2A}}\right)\exp \left( -\frac{{{{\left( {y_{1} - x_{1}B} \right)}^2}}}{{2\sigma^{2}}} \right)\\
+\beta(x_{N})&=1
+	\end{aligned}
+\end{equation}
+Here we have to notice that all probabiltiy distributions are Gaussian, which means that the product of two Gaussians as well as the convolution of two Gaussians is also a Gaussian.  As a consequence, all $\alpha(x_{n})$ and $\beta(x_{n})$ are Gaussian (except for $\beta(x_{N})$).  For a computation, all we need to calculate is the mean and standard deviation of each $\alpha(x_{n})$ and $\beta(x_{n})$ since the normalization of Gaussians is known.  Similarily, we can calculate the probability distributions of consecutive $x_{n-1}$ and $x_{n}$:
+\begin{equation}\label{margxnxnmone}
+	\begin{aligned}
+	p\left( x_{n-1},x_{n}|\{y_{i}\},\Theta^{old}\right)&=\frac{p\left( \{y_{i}\}|x_{n-1},x_{n},\Theta^{old}\right)p(x_{n-1},x_{n})}{p(\{y_{i}\}|\Theta^{old})}\\
+	&=\frac{p(y_{1},\dots,y_{n}|x_{n},\Theta^{old})p(y_{n+1},\dots,y_{N}|x_{n},\Theta^{old})p(x_{n})}{p(\{y_{i}\}|\Theta^{old})}\\
+	&=\frac{\alpha(x_{n-1})p(y_{n}|x_{n},\Theta^{old})p(x_{n}|x_{n-1},\Theta^{old})\beta(x_{n})}{p(\{y_{i}\}|\Theta^{old})}
+	\end{aligned}
+\end{equation}
+We can now move to the implementation of the EM algorithm for our specific case: (1) We pick starting values for the parameters ${A,B,\sigma_N}$; (2) We calculate all $p\left( x_{n}|\{y_{i}\},\Theta^{old}\right)$ and $p\left( x_{n-1},x_{n}|\{y_{i}\},\Theta^{old}\right)$ which represent the E step; (3) We calculate the improved parameters by using the procedure for estimating parameters from a OU process without noise \cite{PRE}, which yields improved parameters for $A$ and $B$.  For this analysis we only require the expectation values of $x_{1}^{2},x_{N}^2$, the sum of $x_{i}^2$, and $x_{i}x_{i+1}$ which can be calculated using eq.\ref{margxn} and eq.\ref{margxnxnmone}.
+\subsection{Appendix}
+In this section we collect useful procedures for calculating the different steps in the EM algorithm.
+\subsubsection{Calculate correlation coefficient from polynomials}
+When calculating $p\left( x_{n-1},x_{n}|\{y_{i}\},\Theta^{old}\right)$ we have to calculate the correlation coefficient $\rho$ of a bivariate Normal distribution
+\begin{equation}
+    p(x,y) =
+      \frac{1}{2 \pi  \sigma_X \sigma_Y \sqrt{1-\rho^2}}
+      \exp\left(
+        -\frac{1}{2(1-\rho^2)}\left[
+          \frac{(x-\mu_X)^2}{\sigma_X^2} +
+          \frac{(y-\mu_Y)^2}{\sigma_Y^2} -
+          \frac{2\rho(x-\mu_X)(y-\mu_Y)}{\sigma_X \sigma_Y}
+      \right]\right)
+\end{equation}
+from
+\begin{equation}
+	p(x,y) \propto \exp\left(ax^{2}+by^{2}+cxy+dx+ey+f\right)
+\end{equation}
+then from comparing the polynomial terms we see that
+\begin{equation}
+	\begin{aligned}
+	\rho &= -\frac{c}{\sqrt{ab}}\\
+	\sigma_{x} &=\sqrt{\frac{1}{2\left(a-\frac{c^2}{b}\right)}}\\
+	\sigma_{y} &=\sqrt{\frac{1}{2\left(b-\frac{c^2}{a}\right)}}\\
+	\rho \sigma_{x} \sigma_{y} &= \frac{c}{ab-c^2}
+	\end{aligned}
+\end{equation}
+From the last expression we can calculate the expectation value of $x_{n}x_{n-1}$.
+\subsubsection{Product of two Gaussians}
+\begin{equation}
+\mathcal{N}(x,\mu_{1},\sigma_{1})\mathcal{N}(x,\mu_{2},\sigma_{2}) 
+\propto \mathcal{N}\left(x,\frac{\mu_{1}\sigma_{2}^{2}+\mu_{2}\sigma_{1}^{2}}{\sigma_{1}^2+\sigma_{2}^2},\sqrt{\frac{\sigma_{1}^2\sigma_{2}^2}{\sigma_{1}^2+\sigma_{2}^2}}\right)
+\end{equation}
+\subsubsection{Convolution of two Gaussians}
+\begin{equation}
+\int_{-\infty}^{+\infty}\mathcal{N}(x-y,\mu_{1},\sigma_{1})\mathcal{N}(y,\mu_{2},\sigma_{2})dy
+	\propto\mathcal{N}\left(x,\mu_{1}+\mu_{2},\sqrt{\sigma_{1}^2+\sigma_{2}^2}\right)
+\end{equation}
 \begin{acknowledgments}
 We wish to acknowledge funding by the 
 \end{acknowledgments}

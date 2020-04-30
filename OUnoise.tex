@@ -186,7 +186,7 @@ here we took advantage of the properties of the Markov chain $\{x_{i}\}$.  If we
 with the starting value of
 \begin{equation}
 	\begin{aligned}
-\alpha(x_{1})&\propto \exp \left( { - \frac{{x_1}^2}{2A}}\right)\exp \left( -\frac{{{{\left( {y_{1} - x_{1}B} \right)}^2}}}{{2\sigma^{2}}} \right)\\
+\alpha(x_{1})&\propto \exp \left( { - \frac{{x_1}^2}{2A}}\right)\exp \left( -\frac{{{{\left( {y_{1} - x_{1}} \right)}^2}}}{{2\sigma_{N}^{2}}} \right)\\
 \beta(x_{N})&=1
 	\end{aligned}
 \end{equation}
@@ -198,7 +198,15 @@ Here we have to notice that all probabiltiy distributions are Gaussian, which me
 	&=\frac{\alpha(x_{n-1})p(y_{n}|x_{n},\Theta^{old})p(x_{n}|x_{n-1},\Theta^{old})\beta(x_{n})}{p(\{y_{i}\}|\Theta^{old})}
 	\end{aligned}
 \end{equation}
-We can now move to the implementation of the EM algorithm for our specific case: (1) We pick starting values for the parameters ${A,B,\sigma_N}$; (2) We calculate all $p\left( x_{n}|\{y_{i}\},\Theta^{old}\right)$ and $p\left( x_{n-1},x_{n}|\{y_{i}\},\Theta^{old}\right)$ which represent the E step; (3) We calculate the improved parameters by using the procedure for estimating parameters from a OU process without noise \cite{PRE}, which yields improved parameters for $A$ and $B$.  For this analysis we only require the expectation values of $x_{1}^{2},x_{N}^2$, the sum of $x_{i}^2$, and $x_{i}x_{i+1}$ which can be calculated using eq.\ref{margxn} and eq.\ref{margxnxnmone}.
+We can now move to the implementation of the EM algorithm for our specific case: (1) We pick starting values for the parameters ${A,B,\sigma_N}$; (2) We calculate all $p\left( x_{n}|\{y_{i}\},\Theta^{old}\right)$ and $p\left( x_{n-1},x_{n}|\{y_{i}\},\Theta^{old}\right)$ which represent the E step; (3) We calculate the improved parameters by using the procedure for estimating parameters from a OU process without noise \cite{PRE}, which yields improved parameters for $A$ and $B$.  For this analysis we only require the expectation values of $x_{1}^{2},x_{N}^2$, the sum of $x_{i}^2$, and $x_{i}x_{i+1}$ which can be calculated using eq.\ref{margxn} and eq.\ref{margxnxnmone}.  The updated value for $\sigma_{N}$ can be obtained by considering the following:
+\begin{equation}
+	\ln \prod_{i=1}^{N}\frac{1}{\sqrt{2\pi\sigma_{N}^{2}}}\exp\left(-\frac{(x_{i}-y_{i})^2}{2\sigma_{N}^{2}}\right)=-N\ln\sigma_{N}-\frac{1}{2\sigma_{N}^2}\sum_{i=1}^{N}(x_{i}-y_{i})^2
+\end{equation}
+The maximum of this expression can be found by setting its derivative with respect to $\sigma_N$ to zero, which results in:
+\begin{equation}
+	\sigma_{N}^{2} = \frac{1}{N}\sum_{i=1}^{N}\sigma_{x_{i}}^{2}+y_{i}^{2}-2\mu_{x_{i}}y_{i}
+\end{equation}
+where we use the $\sigma_{x_{i}}$ and $\mu_{x_{i}}$ from $p\left( x_{n}|\{y_{i}\},\Theta^{old}\right)=\mathcal{N}(x_{i},\mu=\mu_{x_{i}},\sigma=\sigma_{x_{i}})$.
 \subsection{Appendix}
 In this section we collect useful procedures for calculating the different steps in the EM algorithm.
 \subsubsection{Calculate correlation coefficient from polynomials}
@@ -215,18 +223,27 @@ When calculating $p\left( x_{n-1},x_{n}|\{y_{i}\},\Theta^{old}\right)$ we have t
 \end{equation}
 from
 \begin{equation}
-	p(x,y) \propto \exp\left(ax^{2}+by^{2}+cxy+dx+ey+f\right)
+	p(x,y) \propto \exp-\left(ax^{2}+by^{2}+cxy+dx+ey+f\right)
 \end{equation}
-then from comparing the polynomial terms we see that
+This can be acomplished by comparing the polynomial terms
 \begin{equation}
 	\begin{aligned}
-	\rho &= -\frac{c}{\sqrt{ab}}\\
-	\sigma_{x} &=\sqrt{\frac{1}{2\left(a-\frac{c^2}{b}\right)}}\\
-	\sigma_{y} &=\sqrt{\frac{1}{2\left(b-\frac{c^2}{a}\right)}}\\
-	\rho \sigma_{x} \sigma_{y} &= \frac{c}{ab-c^2}
+	\rho &= \frac{c}{2\sqrt{ab}}\\
+	\sigma_{x} &=\sqrt{\frac{2b}{4ab-c^2}}\\
+	\sigma_{y} &=\sqrt{\frac{2a}{4ab-c^2}}\\
+	\rho \sigma_{x} \sigma_{y} &= \frac{c}{4ab-c^2}\\
+	\mu_x &= \frac{2bd+ce}{4ab-c^2}\\
+	\mu_y &= \frac{2ae+dc}{4ab-c^2}
 	\end{aligned}
 \end{equation}
-From the last expression we can calculate the expectation value of $x_{n}x_{n-1}$.
+From these expressions we can calculate the expectation value of $x^2$ and $xy$.
+\begin{equation}
+	\begin{aligned}
+	\mathbb{E}(x^2) &= \sigma_{x}^2 + \mu_{x}^2\\
+	\mathbb{E}(xy) &= \rho \sigma_{x} \sigma_{y} + \mu_{x}\mu_{y}
+	\end{aligned}
+\end{equation}
+
 \subsubsection{Product of two Gaussians}
 \begin{equation}
 \mathcal{N}(x,\mu_{1},\sigma_{1})\mathcal{N}(x,\mu_{2},\sigma_{2}) 
@@ -236,6 +253,19 @@ From the last expression we can calculate the expectation value of $x_{n}x_{n-1}
 \begin{equation}
 \int_{-\infty}^{+\infty}\mathcal{N}(x-y,\mu_{1},\sigma_{1})\mathcal{N}(y,\mu_{2},\sigma_{2})dy
 	\propto\mathcal{N}\left(x,\mu_{1}+\mu_{2},\sqrt{\sigma_{1}^2+\sigma_{2}^2}\right)
+\end{equation}
+specifically, to calculate $\alpha(x_{n})$ and $beta(x_{n-1})$ we encounter the following convolutions
+\begin{equation}
+	\begin{aligned}
+	\int_{-\infty}^{+\infty}dx_{n-1}
+	\exp \left( -\frac{{{{\left( {x_{n-1} - \mu} \right)}^2}}}{{2\sigma^{2}}} \right)
+	\exp \left( -\frac{{{{\left( {x_{n} - Bx_{n-1}} \right)}^2}}}{{2A(1-B^{2})}} \right)
+	&\propto \mathcal{N}\left(x_{n},B\mu,\sqrt{B^{2}\sigma^2+A(1-B^{2})}\right)\\
+	\int_{-\infty}^{+\infty}dx_{n}
+	\exp \left( -\frac{{{{\left( {x_{n} - y_{n}} \right)}^2}}}{{2\sigma_{N}^{2}}} \right)
+	\exp \left( -\frac{{{{\left( {x_{n} - Bx_{n-1}} \right)}^2}}}{{2A(1-B^{2})}} \right)
+	&\propto \mathcal{N}\left(x_{n-1},y_{n}/B,\sqrt{\sigma^2+A(1-B^{2})}/B\right)
+	\end{aligned}
 \end{equation}
 \begin{acknowledgments}
 We wish to acknowledge funding by the 

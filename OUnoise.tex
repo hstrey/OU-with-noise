@@ -204,7 +204,7 @@ We can now move to the implementation of the EM algorithm for our specific case:
 \end{equation}
 The maximum of this expression can be found by setting its derivative with respect to $\sigma_N$ to zero, which results in:
 \begin{equation}
-	\sigma_{N}^{2} = \frac{1}{N}\sum_{i=1}^{N}\sigma_{x_{i}}^{2}+y_{i}^{2}-2\mu_{x_{i}}y_{i}
+	\sigma_{N}^{2} = \frac{1}{N}\sum_{i=1}^{N}\sigma_{x_{i}}^{2}+\mu_{x_{i}}^{2}+y_{i}^{2}-2\mu_{x_{i}}y_{i}
 \end{equation}
 where we use the $\sigma_{x_{i}}$ and $\mu_{x_{i}}$ from $p\left( x_{n}|\{y_{i}\},\Theta^{old}\right)=\mathcal{N}(x_{i},\mu=\mu_{x_{i}},\sigma=\sigma_{x_{i}})$.
 \subsection{Appendix}

@@ -28,6 +28,7 @@
 \usepackage{subcaption}
 \usepackage{float}
 \usepackage{tikz}
+%\usepackage{breqn}
 \usetikzlibrary{calc,arrows.meta,positioning}
 %\usepackage{hyperref}% add hypertext capabilities
 %\usepackage[mathlines]{lineno}% Enable numbering of text and display math
@@ -206,44 +207,12 @@ The maximum of this expression can be found by setting its derivative with respe
 \begin{equation}
 	\sigma_{N}^{2} = \frac{1}{N}\sum_{i=1}^{N}\sigma_{x_{i}}^{2}+\mu_{x_{i}}^{2}+y_{i}^{2}-2\mu_{x_{i}}y_{i}
 \end{equation}
-where we use the $\sigma_{x_{i}}$ and $\mu_{x_{i}}$ from $p\left( x_{n}|\{y_{i}\},\Theta^{old}\right)=\mathcal{N}(x_{i},\mu=\mu_{x_{i}},\sigma=\sigma_{x_{i}})$.
+where we use the $\sigma_{x_{i}}$ and $\mu_{x_{i}}$ from $p\left( x_{n}|\{y_{i}\},\Theta^{old}\right)=\mathcal{N}(x_{i},\mu=\mu_{x_{i}},\sigma=\sigma_{x_{i}})$.  In addition, if we assume that the errors are independent of each other then the error of $\sigma_{N}$ can be written as:
+\begin{equation}
+	d\sigma_{N} = \frac{\sigma_{N}}{\sqrt{2N}}
+\end{equation}
 \subsection{Appendix}
 In this section we collect useful procedures for calculating the different steps in the EM algorithm.
-\subsubsection{Calculate correlation coefficient from polynomials}
-When calculating $p\left( x_{n-1},x_{n}|\{y_{i}\},\Theta^{old}\right)$ we have to calculate the correlation coefficient $\rho$ of a bivariate Normal distribution
-\begin{equation}
-    p(x,y) =
-      \frac{1}{2 \pi  \sigma_X \sigma_Y \sqrt{1-\rho^2}}
-      \exp\left(
-        -\frac{1}{2(1-\rho^2)}\left[
-          \frac{(x-\mu_X)^2}{\sigma_X^2} +
-          \frac{(y-\mu_Y)^2}{\sigma_Y^2} -
-          \frac{2\rho(x-\mu_X)(y-\mu_Y)}{\sigma_X \sigma_Y}
-      \right]\right)
-\end{equation}
-from
-\begin{equation}
-	p(x,y) \propto \exp-\left(ax^{2}+by^{2}+cxy+dx+ey+f\right)
-\end{equation}
-This can be acomplished by comparing the polynomial terms
-\begin{equation}
-	\begin{aligned}
-	\rho &= \frac{c}{2\sqrt{ab}}\\
-	\sigma_{x} &=\sqrt{\frac{2b}{4ab-c^2}}\\
-	\sigma_{y} &=\sqrt{\frac{2a}{4ab-c^2}}\\
-	\rho \sigma_{x} \sigma_{y} &= \frac{c}{4ab-c^2}\\
-	\mu_x &= \frac{2bd+ce}{4ab-c^2}\\
-	\mu_y &= \frac{2ae+dc}{4ab-c^2}
-	\end{aligned}
-\end{equation}
-From these expressions we can calculate the expectation value of $x^2$ and $xy$.
-\begin{equation}
-	\begin{aligned}
-	\mathbb{E}(x^2) &= \sigma_{x}^2 + \mu_{x}^2\\
-	\mathbb{E}(xy) &= \rho \sigma_{x} \sigma_{y} + \mu_{x}\mu_{y}
-	\end{aligned}
-\end{equation}
-
 \subsubsection{Product of two Gaussians}
 \begin{equation}
 \mathcal{N}(x,\mu_{1},\sigma_{1})\mathcal{N}(x,\mu_{2},\sigma_{2}) 
@@ -265,6 +234,32 @@ specifically, to calculate $\alpha(x_{n})$ and $beta(x_{n-1})$ we encounter the 
 	\exp \left( -\frac{{{{\left( {x_{n} - y_{n}} \right)}^2}}}{{2\sigma_{N}^{2}}} \right)
 	\exp \left( -\frac{{{{\left( {x_{n} - Bx_{n-1}} \right)}^2}}}{{2A(1-B^{2})}} \right)
 	&\propto \mathcal{N}\left(x_{n-1},y_{n}/B,\sqrt{\sigma^2+A(1-B^{2})}/B\right)
+	\end{aligned}
+\end{equation}
+\subsubsection{Calculate crosscorrelation coefficients}
+In Eq. \ref{margxnxnmone} we encounter bivariate distributions such as
+\begin{equation}
+	\begin{aligned}
+	p(x,y)=\frac{1}{S}
+%	\frac{1}{2\pi}\sqrt{\frac{B^{2}}{A(1-B^{2})}+\frac{1}{\sigma_{x}^{2}}}\sqrt{\frac{1}{A(1-B^{2})+B^{2}\sigma_{x}^{2}}}
+%	\exp\left( \frac{(\mu_{y}-B\mu_{x})^{2}}{2(A(1-B^{2})+B^{2}\sigma^{x}_{x}+\sigma^{2}_{y})}\right)\\
+	\exp \left( -\frac{{{{\left( {x - \mu_{x}} \right)}^2}}}{{2\sigma_{x}^{2}}} \right)
+	\exp \left( -\frac{{{{\left( {y - Bx} \right)}^2}}}{{2A(1-B^{2})}} \right)
+	\exp \left( -\frac{{{{\left( {y - \mu_{y}} \right)}^2}}}{{2\sigma_{y}^{2}}} \right)
+	\end{aligned}
+\end{equation}
+where $S$ is the normalization constant
+\begin{equation}
+	S = \int_{-\infty}^{\infty}\int_{-\infty}^{\infty}p(x,y)dxdy
+\end{equation}
+resulting in the expectation value of $xy$
+\begin{equation}
+	\begin{aligned}
+	\mathbb{E}(xy) &= \int_{-\infty}^{\infty}\int_{-\infty}^{\infty}p(x,y)xydxdy\\
+	&=	\frac{1}{(A(1-B^{2})+B^{2}\sigma^{x}_{x}+\sigma^{2}_{y})^{2}}\\
+&\left( A(1-B^{2})(B^{2}\mu_{x}\mu_{y}\sigma_{x}^{2}+B\mu_{y}^{2}\sigma_{x}^{2}+\mu_{x}\mu_{y}\sigma_{y}^{2}+B(\mu_{x}^{2}+\sigma_{x}^{2})\sigma_{y}^{2})\right.\\
+	&\left.+B(2B\mu_{x}\mu_{y}\sigma_{x}^{2})\sigma_{y}^{2}+(\mu_{x}^{2}+\sigma_{x}^{2})\sigma_{y}^{2}+B^{2}\sigma_{x}^{2}(\mu_{y}^2+\sigma_{y}^{2}))
+	+A^{2}(1-B^{2})^{2}\mu_{x}\mu_{y} \right)
 	\end{aligned}
 \end{equation}
 \begin{acknowledgments}

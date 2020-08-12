@@ -85,7 +85,7 @@ This equation describes the conditional probability of finding a particle at tim
 	\frac{1}{{\sqrt {2\pi A(1-B^{2}(\Delta t))}^{(N-1)} }}
 	\exp \left( { - \sum\limits_{i=1}^{N-1}\frac{{{{\left( {x_{i+1} - {x_i}B(\Delta t)} \right)}^2}}}{{2A(1-B^{2}(\Delta t))}}} \right)
 \end{equation}
-We recently published an anlystical solution to the Ornstein-Uhlenbeck maximum likelihood problem and here we want to consider the same problem but with added noise.  For the moment, we will assume Gaussian noise that is added to each data point.  Such noise can be described as follows:
+We recently published an anlystical solution to the Ornstein-Uhlenbeck maximum likelihood problem \cite{RN91} and here we want to consider the same problem but with added noise.  For the moment, we will assume Gaussian noise that is added to each data point.  Such noise can be described as follows:
 \begin{equation}
 	y_{i} \sim \mathcal{N}(\mu=x_{i},\sigma=\sigma_{N})
 \end{equation}
@@ -93,7 +93,7 @@ with likelihood function for the measured data $\{y_{i}\}$ given $\{x_{i}\}$ and
 \begin{equation}
 	p\left( \left\{y_i(t_i)\right\} \left| \left\{x_i(t_i)\right\},\sigma_{N} \right.\right) =
 	\frac{1}{{\sqrt {2\pi \sigma_{N}^{2}}^{N} }}
-	\exp \left( { - \sum\limits_{i=1}^{N}\frac{{{{\left( {y_{i} - x_{i}B(\Delta t)} \right)}^2}}}{{2\sigma^{2}}}} \right)
+	\exp \left( { - \sum\limits_{i=1}^{N}\frac{{{{\left( {y_{i} - x_{i}B(\Delta t)} \right)}^2}}}{{2\sigma_{N}^{2}}}} \right)
 \end{equation}
 
 Since we are measuring $\{y_{i}\}$, $\{x_{i}\}$ are latent variables.  If we knew $\{x_{i}\}$ and $\{y_{i}\}$ the likelihood function would simply be.
@@ -157,7 +157,7 @@ Using Bayes Theorem, we can express the conditional probability of the parameter
 \end{equation}
 In principle, from this equation, we could estimate the parameters from a measurement of $\{y_{i}\}$ using a maximum likelihood approach.
 \subsection{Implementation of the Expectation Maximization algorithm}
-As we can see from the previous equation, a simple maximum likelihood approach is computationally challenging.  Because we are dealing with Gaussian distributions, a typical approach is to take the logarithm of the likelihood and hope that the likelihood factors nicely.  But in our case, because of the marginalization of the hidden variables $\{x_{i}\}$, we are taking the logarithm of integrals over $\{x_{i}\}$ which does not simplify the equation.  On the other hand, we recognize that $p\left( \{x_{i}\},\{y_{i}\}|A,B,\sigma_{N}\right)$ factors nicely.  The Expectation Maximization (EM) algorithm takes advantage of this fact.  The EM algorithm works as follows: (1) pick a starting point for the parameters $\Theta^{old} = \{A^{old},B^{old},\sigma_{N}^{old}\}$; (2) calculate the probability distribution for each hidden variable $\{x_{i}\}$ given these parameters; (3) maximize the following function with respect to $\Theta$ to find the new parameters.
+As we can see from the previous equation, a simple maximum likelihood approach is computationally challenging.  Because we are dealing with Gaussian distributions, a typical approach is to take the logarithm of the likelihood and hope that the likelihood factors nicely.  But in our case, because of the marginalization of the hidden variables $\{x_{i}\}$, we are taking the logarithm of integrals over $\{x_{i}\}$ which does not simplify the equation.  On the other hand, we recognize that $p\left( \{x_{i}\},\{y_{i}\}|A,B,\sigma_{N}\right)$ factors nicely.  The Expectation Maximization (EM) algorithm takes advantage of this fact (see \cite{RN90} chapter 9).  The EM algorithm works as follows: (1) pick a starting point for the parameters $\Theta^{old} = \{A^{old},B^{old},\sigma_{N}^{old}\}$; (2) calculate the probability distribution for each hidden variable $\{x_{i}\}$ given these parameters; (3) maximize the following function with respect to $\Theta$ to find the new parameters.
 \begin{equation}
 	\mathcal{Q}(\Theta,\Theta^{old}) = \idotsint p\left( \{x_{i}\}|\{y_{i}\},\Theta^{old}\right)\ln p\left( \{x_{i}\},\{y_{i}\}|\Theta\right)\,dx_1 \dots dx_N
 \end{equation}
@@ -177,7 +177,7 @@ using the following definition
 	\beta(x_{n})&=p(y_{n+1},\dots,y_{N}|x_{n},\Theta^{old})
 	\end{aligned}
 \end{equation}
-here we took advantage of the properties of the Markov chain $\{x_{i}\}$.  If we know a specific $x_{n}$ then $x_{n-1}$ and $x_{n+1}$ are independent because the path between the two is blocked.  As a consequence of that, the $y_{i}$ with $i\leq n$ are independent of $y_{i}$ with $i>n$ conditioned on $x_{n}$.  Both $\alpha(x_{n})$ and $\beta(x_{n})$ can be defined and calculated recursively:
+here we took advantage of the properties of the Markov chain $\{x_{i}\}$.  If we know a specific $x_{n}$ then $x_{n-1}$ and $x_{n+1}$ are independent because the path between the two is blocked (See for example \cite{RN90}).  As a consequence of that, the $y_{i}$ with $i\leq n$ are independent of $y_{i}$ with $i>n$ conditioned on $x_{n}$.  Both $\alpha(x_{n})$ and $\beta(x_{n})$ can be defined and calculated recursively:
 \begin{equation}
 	\begin{aligned}
 	\alpha(x_{n})&=p(y_{n}|x_{n},\Theta^{old})\int \alpha(x_{n-1})p(x_{n}|x_{n-1},\Theta^{old})dx_{n-1}\\
@@ -199,18 +199,38 @@ Here we have to notice that all probabiltiy distributions are Gaussian, which me
 	&=\frac{\alpha(x_{n-1})p(y_{n}|x_{n},\Theta^{old})p(x_{n}|x_{n-1},\Theta^{old})\beta(x_{n})}{p(\{y_{i}\}|\Theta^{old})}
 	\end{aligned}
 \end{equation}
-We can now move to the implementation of the EM algorithm for our specific case: (1) We pick starting values for the parameters ${A,B,\sigma_N}$; (2) We calculate all $p\left( x_{n}|\{y_{i}\},\Theta^{old}\right)$ and $p\left( x_{n-1},x_{n}|\{y_{i}\},\Theta^{old}\right)$ which represent the E step; (3) We calculate the improved parameters by using the procedure for estimating parameters from a OU process without noise \cite{PRE}, which yields improved parameters for $A$ and $B$.  For this analysis we only require the expectation values of $x_{1}^{2},x_{N}^2$, the sum of $x_{i}^2$, and $x_{i}x_{i+1}$ which can be calculated using eq.\ref{margxn} and eq.\ref{margxnxnmone}.  The updated value for $\sigma_{N}$ can be obtained by considering the following:
+We can now move to the implementation of the EM algorithm for our specific case: (1) We pick starting values for the parameters ${A,B,\sigma_N}$; (2) We calculate all $p\left( x_{n}|\{y_{i}\},\Theta^{old}\right)$ and $p\left( x_{n-1},x_{n}|\{y_{i}\},\Theta^{old}\right)$ which represent the E step; (3) We calculate the improved parameters by using the procedure for estimating parameters from a OU process without noise \cite{RN91}, which yields improved parameters for $A$ and $B$.  For this analysis we only require the expectation values of $x_{1}^{2},x_{N}^2$, the sum of $x_{i}^2$, and $x_{i}x_{i+1}$ which can be calculated using eq.\ref{margxn} and eq.\ref{margxnxnmone}.  The updated value for $\sigma_{N}$ can be obtained by considering the following:
 \begin{equation}
 	\ln \prod_{i=1}^{N}\frac{1}{\sqrt{2\pi\sigma_{N}^{2}}}\exp\left(-\frac{(x_{i}-y_{i})^2}{2\sigma_{N}^{2}}\right)=-N\ln\sigma_{N}-\frac{1}{2\sigma_{N}^2}\sum_{i=1}^{N}(x_{i}-y_{i})^2
 \end{equation}
 The maximum of this expression can be found by setting its derivative with respect to $\sigma_N$ to zero, which results in:
 \begin{equation}
-	\sigma_{N}^{2} = \frac{1}{N}\sum_{i=1}^{N}\sigma_{x_{i}}^{2}+\mu_{x_{i}}^{2}+y_{i}^{2}-2\mu_{x_{i}}y_{i}
+	\sigma_{N, max}^{2} = \frac{1}{N}\sum_{i=1}^{N}\sigma_{x_{i}}^{2}+\mu_{x_{i}}^{2}+y_{i}^{2}-2\mu_{x_{i}}y_{i}
 \end{equation}
-where we use the $\sigma_{x_{i}}$ and $\mu_{x_{i}}$ from $p\left( x_{n}|\{y_{i}\},\Theta^{old}\right)=\mathcal{N}(x_{i},\mu=\mu_{x_{i}},\sigma=\sigma_{x_{i}})$.  In addition, if we assume that the errors are independent of each other then the error of $\sigma_{N}$ can be written as:
+where we use the $\sigma_{x_{i}}$ and $\mu_{x_{i}}$ from $p\left( x_{n}|\{y_{i}\},\Theta^{old}\right)=\mathcal{N}(x_{i},\mu=\mu_{x_{i}},\sigma=\sigma_{x_{i}})$.\\
+To determine the error of the estimated parameters after convergence of the EM algorithm, we can take advantage of the fact that when the EM algorithm has converged then $\mathcal{Q}(\Theta,\Theta^{old})$ is equal to the posterior distribution \cite{RN90} and we can use the error estimates for $A$ and $B$ from \cite{RN91}. Since $\sigma_{N}$ is independent from $A$ and $B$ in $\mathcal{Q}(\Theta,\Theta^{old})$, we can write:
 \begin{equation}
-	d\sigma_{N} = \frac{\sigma_{N}}{\sqrt{2N}}
+	d\sigma_{N,max} = \frac{\sigma_{N, max}}{\sqrt{2N}}
 \end{equation}
+\subsection{Validation with Simulations}
+In this section we will validate our EM algorithm against Markov-Chain Monte-Carlo (MCMC) methods using simulated ground truth OU time series with known parameters. MCMC methods are drawing samples directly from the posterior distribution and therefore provide accurate estimations of the parameters and their uncertainties.  The expectation is that our EM algoritm will perform equally well as the MCMC methods while providing a significant computational speed increase.
+\subsection{Application to Coupled Oscillators with Noise}
+Here we consider a system of two overdamped oscillators that are coupled by a spring.  The Langevin equations can be written in the following way:
+\begin{equation}
+	\begin{aligned}
+		\dot{x_1} &= -\frac{k}{\gamma}x_{1}-\frac{c}{\gamma}(x_{1}-x_{2}) +\frac{1}{\gamma}\xi_{1}(t)\\
+		\dot{x_2} &= -\frac{k}{\gamma}x_{2}-\frac{c}{\gamma}(x_{2}-x_{1}) +\frac{1}{\gamma}\xi_{2}(t)
+	\end{aligned}
+\end{equation}
+This system can be decoupled by the two eigenfunctions $2y_{1}=x_{1}+x_{2}$ and $2y_{2}=x_{1}-x_{2}$, which results in
+\begin{equation}
+	\begin{aligned}
+		\dot{y_1} &= -\frac{k}{\gamma}y_{1} +\frac{1}{\gamma}\xi_{3}(t)\\
+		\dot{y_2} &= -\frac{k+c}{\gamma}y_{2} +\frac{1}{\gamma}\xi_{4}(t)
+	\end{aligned}
+\end{equation}
+where $y_{1}(t)$ and $y_{2}(t)$ are two Ornstein-Uhlenbeck processes with different relaxation rates.  The equipartition theorem yields $<y_{1}^{2}> = A_{1} = \frac{k_{B}T}{k}$ and $<y_{2}^{2}> = A_{2} = \frac{k_{B}T}{k+c}$.  The other important relationships are: $D=\frac{k_{B}T}{\gamma}$, $\tau_{1}=\frac{A_{1}}{D}$ and $\tau_{2}=\frac{A_{2}}{D}$. If the friction coefficients $\gamma$ are different for $x_{1}$ and $x_{2}$ one can still decouple the system of differential equations by finding the eigenvectors and eigenvalues.  For simplicity we assume that both processes have the same friction coefficient.
+
 \subsection{Appendix}
 In this section we collect useful procedures for calculating the different steps in the EM algorithm.
 \subsubsection{Product of two Gaussians}
@@ -265,5 +285,5 @@ resulting in the expectation value of $xy$
 \begin{acknowledgments}
 We wish to acknowledge funding by the 
 \end{acknowledgments}
-
+\bibliography{OUnoise}
 \end{document}

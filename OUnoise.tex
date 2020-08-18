@@ -231,6 +231,16 @@ This system can be decoupled by the two eigenfunctions $2y_{1}=x_{1}+x_{2}$ and 
 \end{equation}
 where $y_{1}(t)$ and $y_{2}(t)$ are two Ornstein-Uhlenbeck processes with different relaxation rates.  The equipartition theorem yields $<y_{1}^{2}> = A_{1} = \frac{k_{B}T}{k}$ and $<y_{2}^{2}> = A_{2} = \frac{k_{B}T}{k+c}$.  The other important relationships are: $D=\frac{k_{B}T}{\gamma}$, $\tau_{1}=\frac{A_{1}}{D}$ and $\tau_{2}=\frac{A_{2}}{D}$. If the friction coefficients $\gamma$ are different for $x_{1}$ and $x_{2}$ one can still decouple the system of differential equations by finding the eigenvectors and eigenvalues.  For simplicity we assume that both processes have the same friction coefficient.
 
+In many fields, the Pearson Correlation Coefficient is $\rho$ used to establish to what extent two time series are correlation.  Here we will establish the connection between our coupling coefficient $c$ and $\rho$.
+\begin{equation}
+	\rho = \frac{\left<x_{1}x_{2}\right>}{\sigma_{1}\sigma_{2}} = \frac{\left<(y_{1}+y_{2})(y_{1}-y_{2})\right>}{\sqrt{\left<(y_{1}+y_{2})^{2}\right>\left<(y_{1}-y_{2})^{2}\right>}} = \frac{\left<y_{1}^{2}\right>-\left<y_{2}^{2}\right>}{\left<y_{1}^{2}\right>+\left<y_{2}^{2}\right>} = \frac{c}{2k+c}
+\end{equation}
+As expected, for $c=0$ we get $\rho=0$, and $c=\infty$ results in $\rho=1$. Often correlation analysis are performed on normalized samples.  It therefore makes sense to define a unitless coupling coefficient $C=c/k$  which can be calculated by estimating $A_1$ and $A_2$ from the data:
+\begin{equation}
+	C = \frac{A_{1}-A_{2}}{A_{2}}=\frac{c}{k}
+\end{equation}
+We could in principle extend this procedure to negative coupling coefficients.  For example, $c=-k$ would results in $\rho=-1$, but for this $c$, looking at the coupled differential equations, $y_2$ becomes unbound.  In order to map the normalized coupling coefficient C in the range from $-\infty$ to $+\infty$ to the Pearson correlation coefficient $\rho=-1$ to $\rho=1$ we suggest the following procedure.  From two normalized samples $x_1$ and $x_2$, we calculate $2y_{1}=x_{1}-x_{2}$ and $2y_{2}=x_{1}-x{2}$.  From $y_1$ and $y_2$, we estimate the amplitudes $A_{1}$ and $A_{2}$.  If $A_{1}>A_{2}$ then the coupling coefficient $C>0$ and can be calculated using $C=(A_{1}-A_{2})/A_{2}$.  If on the other hand $A_{1}<A_{2}$ then the coupling coefficent is negative and $C=(A_{1}-A_{2})/A_{1}$.
+
 \subsection{Appendix}
 In this section we collect useful procedures for calculating the different steps in the EM algorithm.
 \subsubsection{Product of two Gaussians}

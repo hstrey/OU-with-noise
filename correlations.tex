@@ -71,9 +71,15 @@ May be entered using the \verb+\pacs{#1}+ command.
 %\tableofcontents
 \onecolumngrid
 \subsection{Introduction}
-
+In many fields of science we observe time series of a fluctuating quantitiy: local density fluctuations of a liquid or gas, thermal fluctuations of a bead in an optical trap, thermal fluctuations of soft membranes, or fluctuations of neural activity as measured by fMRI.  In this article, we are exploring how to characterize correlations between two such time series taking into account that the time series exhibit a relaxation time (memory).  In particluar, we will restrict ourselves to the simplest random process that results in a fluctuating time series with relaxation: the Ornstein-Uhlenbeck (OU) process.  A OU process with mean zero can be expressed by the following Langevin equation:
+\begin{equation}
+\dot x =  - \frac{k}{\gamma }x + \frac{1}{\gamma }\xi(t)
+\label{model}
+\end{equation}
+where k is the spring constant, $\gamma$ is the friction coefficient and $\xi(t)$ is a randomly fluctuating force.  
+We recently published a maximum likelihood method to estimate parameters from an OU process time series, and here we attempt the same for coupled OU processes.
 \subsection{Coupled Oscillators}
-Here we consider a system of two overdamped oscillators that are coupled by a spring.  The Langevin equations can be written in the following way:
+Here we consider a system of two overdamped oscillators, characterized by a friction coefficient $\gamma$ and spring constant $k$, that are coupled by a spring with a spring constant $c$.  The Langevin equations can be written in the following way:
 \begin{equation}
 	\begin{aligned}
 		\dot{x_1} &= -\frac{k}{\gamma}x_{1}-\frac{c}{\gamma}(x_{1}-x_{2}) +\frac{1}{\gamma}\xi_{1}(t)\\
@@ -158,13 +164,22 @@ with
 The derivative with respect to $D$ can be written:
 \begin{eqnarray}\label{partiald}
 	&&\left.\frac{\partial}{\partial D}\Phi\right|_{A_{k,max},D} =\\
-	&&\left(\frac{B_{1}(N-1)}{1-B_{1}}
+	&&\left(\frac{B_{1}(N-1)}{1-B_{1}^{2}}
 	-\frac{1}{2A_{1}}\frac{\partial}{\partial B_{1}}Q_{1}(B_{1})\right)\left.\frac{\partial B_{1}}{\partial D}\right|_{A_{1,max},D}\\
-	&&+\left(+\frac{B_{2}(N-1)}{1-B_{2}}
+	&&+\left(\frac{B_{2}(N-1)}{1-B_{2}^{2}}
 	-\frac{1}{2A_{2}}\frac{\partial}{\partial B_{2}}Q_{2}(B_{2})\right)\left.\frac{\partial B_{2}}{\partial D}\right|_{A_{2,max},D}=0
 \end{eqnarray}
+From these three equations we need to find $A_{1}$,$A_{2}$ and $D$, which can be done using numerical root finding algorithms that are implemented in standard numerical libraries (e.g. Powell hybrid method implemented in MINPACK \cite{osti_6997568}).  In order to estimate the parameter uncertainties, we need to calculate the Jacobian.  Here the only non-zero terms are:
+
+\begin{equation}
+	\begin{aligned}
+		\frac{\partial^{2}}{\partial A_{k}^2}\Phi &=\\
+		\frac{\partial^{2}}{\partial A_{k}\partial D}\Phi &=\\
+		\frac{\partial^{2}}{\partial D^2}\Phi &=
+	\end{aligned}
+\end{equation}
 \begin{acknowledgments}
 We wish to acknowledge funding by the 
 \end{acknowledgments}
-\bibliography{OUnoise}
+\bibliography{correlations}
 \end{document}

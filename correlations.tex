@@ -140,7 +140,7 @@ with\begin{equation}
 	&= \frac{x_{k,1}^{2}+x_{1,N}^{2}}{1-B_{k}^2}+\frac{1+B_{k}^2}{1-B_{k}^2}\sum\limits_{i=2}^{N-1}x_{k,i}^{2}-\frac{2B_{k}}{1-B_{k}^2}\sum\limits_{i=1}^{N-1}x_{k,i}x_{k,i+1}
 	\end{aligned}
 \end{equation}
-with $C$ representing an unimportant constant. $Q_{k}(B_{k})$ reveals the fundamental statistic - the only terms that exclusively contain the data $\{x_{k,i}\}$:
+with $C$ representing an unimportant constant. $Q_{k}(B_{k})$ reveals the fundamental statistic - the only terms that exclusively contain the data $\{x_{k,i}\}$ with $k=1,2$:
 \begin{equation}
 	\begin{aligned}
 		a_{k,EndPoints}&=a_{k,EP}=x_{k,1}^{2}+x_{k,N}^{2}\\
@@ -148,11 +148,11 @@ with $C$ representing an unimportant constant. $Q_{k}(B_{k})$ reveals the fundam
 		a_{k,Correlation}&=a_{k,C}=\sum\limits_{i=1}^{N-1}x_{k,i}x_{k,i+1}\\
 	\end{aligned}
 \end{equation}
-The derivative with respect to $A_{k}$ determines results in the following condition:
+We find the maximum likelihood parameters $A_{k,max}$ and $D_{max}$ by finding the roots of the first derivatives with respect to the three parameters.  The derivative with respect to $A_{k}$ results in the following two conditions:
 \begin{eqnarray}\label{partialsigma}
 	&&\left.\frac{\partial}{\partial A_{k}}\Phi\right|_{A_{k,max},D} = -\frac{N}{2A_{k,max}}
 	+\frac{1}{2A_{k,max}^{2}}Q(B_{k,max})\\
-	&&+\frac{B_{k,max}D_{max}\Delta t}{A_{k,max}^2}\left(\frac{B_{k,max}(N-1)}{1-B_{k,max}^2}
+	&&+\frac{\partial B_{k}}{\partial A_{k}}\left(\frac{B_{k,max}(N-1)}{1-B_{k,max}^2}
 	 -\frac{1}{2A_{k,max}}
 	 \left.\frac{\partial Q(B_{k})}{\partial B_{k}}
 	 \right|_{A_{k,max},D}\right)=0
@@ -160,6 +160,10 @@ The derivative with respect to $A_{k}$ determines results in the following condi
 with
 \begin{equation}
 	\frac{\partial}{\partial B_{k}}Q_{k}(B_{k}) =  \frac{2}{(1-B_{k}^{2})^{2}}\left(B_{k}a_{k,EP}+2B_{k}a_{k,SS}-(1+B_{k}^{2})a_{k,C}\right)
+\end{equation}
+and
+\begin{equation}
+	\frac{\partial B_{k}}{\partial A_{k}} = \frac{B_{k}D\Delta t}{A_{k}^{2}}
 \end{equation}
 The derivative with respect to $D$ can be written:
 \begin{eqnarray}\label{partiald}
@@ -169,13 +173,36 @@ The derivative with respect to $D$ can be written:
 	&&+\left(\frac{B_{2}(N-1)}{1-B_{2}^{2}}
 	-\frac{1}{2A_{2}}\frac{\partial}{\partial B_{2}}Q_{2}(B_{2})\right)\left.\frac{\partial B_{2}}{\partial D}\right|_{A_{2,max},D}=0
 \end{eqnarray}
+with
+\begin{equation}
+	\frac{\partial B_{k}}{\partial D} = -B_{k}\frac{\Delta t}{A_{k}}
+\end{equation}
 From these three equations we need to find $A_{1}$,$A_{2}$ and $D$, which can be done using numerical root finding algorithms that are implemented in standard numerical libraries (e.g. Powell hybrid method implemented in MINPACK \cite{osti_6997568}).  In order to estimate the parameter uncertainties, we need to calculate the Jacobian.  Here the only non-zero terms are:
 
 \begin{equation}
 	\begin{aligned}
-		\frac{\partial^{2}}{\partial A_{k}^2}\Phi &=\\
-		\frac{\partial^{2}}{\partial A_{k}\partial D}\Phi &=\\
+		\frac{\partial^{2}}{\partial A_{k}^2}\Phi &= \frac{N}{2A_{k}} - \frac{Q_{k}(B_{k})}{A_{k}^{3}}
+		+ \frac{N-1}{1-B_{k}^{2}}\left(B_{k}\frac{\partial^{2} B_{k}}{\partial A_{k}^{2}}
+		+ \left(\frac{\partial B_{k}}{\partial A_{k}}\right)^{2}
+		\left(1+\frac{2B_{k}^{2}}{1-B_{k}^{2}}\right)
+		\right)\\
+		\frac{\partial^{2}}{\partial A_{k}\partial D}\Phi &= \frac{1}{2A_{k}^{2}}\frac{\partial Q(B_{k})}{\partial D}
+		-\frac{1}{2A_{k}}\frac{\partial^{2} Q(B_{k})}{\partial A_{k}\partial D}
+		+ \frac{N-1}{1-B_{k}^{2}}\left(B\frac{\partial^{2} B_{k}}{\partial A_{k}\partial D}
+		+ \frac{\partial B_{k}}{\partial A_{k}}\frac{\partial B_{k}}{\partial D}
+		\left(1+\frac{2B_{k}^{2}}{1-B_{k}^{2}}\right)
+		\right)\\
 		\frac{\partial^{2}}{\partial D^2}\Phi &=
+		\frac{N-1}{1-B_{1}^{2}}\left(B_{1}\frac{\partial^{2} B_{1}}{\partial D^{2}}
+		+ \left(\frac{\partial B_{1}}{\partial D_{k}}\right)^{2}
+		\left(1+\frac{2B_{1}^{2}}{1-B_{1}^{2}}\right)
+		\right)
+		+\frac{N-1}{1-B_{2}^{2}}\left(B_{2}\frac{\partial^{2} B_{2}}{\partial D^{2}}
+		+ \left(\frac{\partial B_{2}}{\partial D_{k}}\right)^{2}
+		\left(1+\frac{2B_{2}^{2}}{1-B_{2}^{2}}\right)
+		\right)\\
+		&- \frac{1}{2A_{1}}\frac{\partial^{2}Q(B_{1})}{\partial D^{2}}
+		- \frac{1}{2A_{2}}\frac{\partial^{2}Q(B_{2})}{\partial D^{2}}
 	\end{aligned}
 \end{equation}
 \begin{acknowledgments}

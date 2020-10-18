@@ -188,7 +188,7 @@ From these three equations we need to find $A_{1}$,$A_{2}$ and $D$, which can be
 		\right)\\
 		\frac{\partial^{2}}{\partial A_{k}\partial D}\Phi &= \frac{1}{2A_{k}^{2}}\frac{\partial Q(B_{k})}{\partial D}
 		-\frac{1}{2A_{k}}\frac{\partial^{2} Q(B_{k})}{\partial A_{k}\partial D}
-		+ \frac{N-1}{1-B_{k}^{2}}\left(B\frac{\partial^{2} B_{k}}{\partial A_{k}\partial D}
+		+ \frac{N-1}{1-B_{k}^{2}}\left(B_{k}\frac{\partial^{2} B_{k}}{\partial A_{k}\partial D}
 		+ \frac{\partial B_{k}}{\partial A_{k}}\frac{\partial B_{k}}{\partial D}
 		\left(1+\frac{2B_{k}^{2}}{1-B_{k}^{2}}\right)
 		\right)\\
@@ -203,6 +203,21 @@ From these three equations we need to find $A_{1}$,$A_{2}$ and $D$, which can be
 		\right)\\
 		&- \frac{1}{2A_{1}}\frac{\partial^{2}Q(B_{1})}{\partial D^{2}}
 		- \frac{1}{2A_{2}}\frac{\partial^{2}Q(B_{2})}{\partial D^{2}}
+	\end{aligned}
+\end{equation}
+with
+\begin{equation}
+	\begin{aligned}
+		\frac{\partial^{2} B_{k}}{\partial A_{k}^{2}} &=B_{k}\left(\frac{D^{2}\Delta t^{2}}{A_{k}^{4}}-\frac{2D\Delta t}{A_{k}^{3}}\right) \\
+		\frac{\partial^{2} B_{k}}{\partial A_{k}\partial D} & = \frac{B_{k}\Delta t}{A_{k}^{2}}\left(1-\frac{D^{2}\Delta t}{A_{k}}\right)\\
+		\frac{\partial^{2} B_{1}}{\partial D^{2}} &= B_{k}\frac{\Delta t^{2}}{A_{k}^{2}}\\
+		\frac{\partial^{2} Q(B_{k})}{\partial A_{k}\partial D} &= 
+		\frac{\partial^{2} Q(B_{k})}{\partial B_{k}^{2}}\frac{\partial B_{k}}{\partial D}\frac{\partial B_{k}}{\partial A_{k}}
+		+\frac{\partial Q(B_{k})}{\partial B_{k}}\frac{\partial^{2} B_{k}}{\partial A_{k}\partial D}\\
+		\frac{\partial^{2}Q(B_{k})}{\partial D^{2}} &= \frac{\partial^{2}Q(B_{k})}{\partial B_{k}^{2}}\left(\frac{\partial B_{k}}{\partial D}\right)^{2}
+		+\frac{\partial Q(B_{k})}{\partial B_{k}}\frac{\partial^{2}B_{k}}{\partial D^{2}}\\
+		\frac{\partial^{2}Q(B_{k})}{\partial B_{k}^{2}} &= \frac{3B_{k}+1}{(1-B_{k}^{2})^{3}}\left(a_{k,EP}+2a_{k,SS}\right)
+		-\frac{4B_{k}^{3}-2B_{k}^{2}+6B_{k}}{(1-B_{k}^{2})^{3}}a_{k,C}
 	\end{aligned}
 \end{equation}
 \begin{acknowledgments}

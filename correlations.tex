@@ -190,16 +190,16 @@ From these three equations we need to find $A_{1}$,$A_{2}$ and $D$, which can be
 		-\frac{1}{2A_{k}}\frac{\partial^{2} Q_{k}(B_{k})}{\partial A_{k}\partial D}
 		+ \frac{N-1}{1-B_{k}^{2}}\left(B_{k}\frac{\partial^{2} B_{k}}{\partial A_{k}\partial D}
 		+ \frac{\partial B_{k}}{\partial A_{k}}\frac{\partial B_{k}}{\partial D}
-		\left(1+\frac{2B_{k}^{2}}{1-B_{k}^{2}}\right)
+		\frac{1+B_{k}^{2}}{1-B_{k}^{2}}
 		\right)\\
 		\frac{\partial^{2}}{\partial D^2}\Phi &=
 		\frac{N-1}{1-B_{1}^{2}}\left(B_{1}\frac{\partial^{2} B_{1}}{\partial D^{2}}
 		+ \left(\frac{\partial B_{1}}{\partial D_{k}}\right)^{2}
-		\left(1+\frac{2B_{1}^{2}}{1-B_{1}^{2}}\right)
+		\frac{1+B_{k}^{2}}{1-B_{k}^{2}}
 		\right)
 		+\frac{N-1}{1-B_{2}^{2}}\left(B_{2}\frac{\partial^{2} B_{2}}{\partial D^{2}}
 		+ \left(\frac{\partial B_{2}}{\partial D}\right)^{2}
-		\left(1+\frac{2B_{2}^{2}}{1-B_{2}^{2}}\right)
+		\frac{1+B_{k}^{2}}{1-B_{k}^{2}}
 		\right)\\
 		&- \frac{1}{2A_{1}}\frac{\partial^{2}Q_{1}(B_{1})}{\partial D^{2}}
 		- \frac{1}{2A_{2}}\frac{\partial^{2}Q_{2}(B_{2})}{\partial D^{2}}
@@ -208,9 +208,9 @@ From these three equations we need to find $A_{1}$,$A_{2}$ and $D$, which can be
 with
 \begin{equation}
 	\begin{aligned}
-		\frac{\partial^{2} B_{k}}{\partial A_{k}^{2}} &=B_{k}\left(\frac{D^{2}\Delta t^{2}}{A_{k}^{4}}-\frac{2D\Delta t}{A_{k}^{3}}\right) \\
+		\frac{\partial^{2} B_{k}}{\partial A_{k}^{2}} &=\frac{B_{k}D\Delta t}{A_{k}^{3}}\left(\frac{D\Delta t}{A_{k}}-2\right) \\
 		\frac{\partial^{2} B_{k}}{\partial A_{k}\partial D} & = \frac{B_{k}\Delta t}{A_{k}^{2}}\left(1-\frac{D\Delta t}{A_{k}}\right)\\
-		\frac{\partial^{2} B_{1}}{\partial D^{2}} &= B_{k}\frac{\Delta t^{2}}{A_{k}^{2}}\\
+		\frac{\partial^{2} B_{k}}{\partial D^{2}} &= B_{k}\frac{\Delta t^{2}}{A_{k}^{2}}\\
 		\frac{\partial^{2} Q_{k}(B_{k})}{\partial A_{k}\partial D} &= 
 		\frac{\partial^{2} Q_{k}(B_{k})}{\partial B_{k}^{2}}\frac{\partial B_{k}}{\partial D}\frac{\partial B_{k}}{\partial A_{k}}
 		+\frac{\partial Q_{k}(B_{k})}{\partial B_{k}}\frac{\partial^{2} B_{k}}{\partial A_{k}\partial D}\\
@@ -223,15 +223,47 @@ with
 		-\frac{4B_{k}^{3}+12B_{k}}{(1-B_{k}^{2})^{3}}a_{k,C}
 	\end{aligned}
 \end{equation}
-Using these terms, we can now express the Jacobian as:
-\begin{equation} J=
+Using these terms, we can now express the Hessian $H$ as:
+\begin{equation}H\Phi=
 \begin{bmatrix} 
 \frac{\partial^{2}}{\partial A_{1}^2}\Phi & 0 & \frac{\partial^{2}}{\partial A_{1}\partial D}\Phi \\
 0 & \frac{\partial^{2}}{\partial A_{2}^2}\Phi & \frac{\partial^{2}}{\partial A_{2}\partial D}\Phi \\
 \frac{\partial^{2}}{\partial A_{1}\partial D}\Phi & \frac{\partial^{2}}{\partial A_{2}\partial D}\Phi & \frac{\partial^{2}}{\partial D^2}\Phi\\
 \end{bmatrix}
 \end{equation}
-whose negative inverse determines the parameter's covariance matrix $C = -J^{-1}(A_{1,max},A_{2,max},D_{max})$. In order to get a better sense of how the parameter estimation errors behave we can calculate the expectation values of the second derivaties considering $N\rightarrow \infty$: $\left\langle a_{k,EP} \right\rangle=2A_{k}$,$\left\langle a_{k,SS} \right\rangle=(N-2)A_{k}$, and $\left\langle a_{k,C} \right\rangle=(N-1)A_{k}B_{k}$.
+whose negative inverse determines the parameter's covariance matrix $C = -H^{-1}(A_{1,max},A_{2,max},D_{max})$. In order to get a better sense of how the parameter estimation errors behave we can calculate the expectation values of the second derivaties considering $N\rightarrow \infty$: $\left\langle a_{k,EP} \right\rangle=2A_{k}$,$\left\langle a_{k,SS} \right\rangle=(N-2)A_{k}$, and $\left\langle a_{k,C} \right\rangle=(N-1)A_{k}B_{k}$.  This results in the following expectation values of the derivatives of $Q_{k}(B_{k})$:
+\begin{equation}
+	\begin{aligned}
+	\left\langle Q_{k}(B_{k})\right\rangle &= NA\\
+	\left\langle\frac{\partial}{\partial B_{k}}Q_{k}(B_{k})\right\rangle &=  \frac{2NA_{k}B_{k}}{1-B_{k}^{2}}\\
+	\left\langle\frac{\partial^{2}Q_{k}(B_{k})}{\partial B_{k}^{2}}\right\rangle &= \frac{4NA_{k}(1+B_{k}^{2})}{(1-B_{k}^{2})^{2}}
+	+\frac{12NA_{k}B_{k}(1-B_{k})}{(1-B_{k}^{2})^{3}}
+	\end{aligned}
+\end{equation}
+From this, we can express the Hessian using the following second derivatives:
+\begin{equation}
+	\begin{aligned}
+		\frac{\partial^{2}}{\partial A_{k}^2}\Phi &= -\frac{N}{2A_{k}^{2}} 
+		- \frac{N}{1-B_{k}^{2}}\left(B_{k}\frac{\partial^{2} B_{k}}{\partial A_{k}^{2}}
+		+ \left(\frac{\partial B_{k}}{\partial A_{k}}\right)^{2}
+		\frac{1+B_{k}^{2}}{1-B_{k}^{2}}\right)\\
+		\frac{\partial^{2}}{\partial A_{k}\partial D}\Phi &=
+		\frac{NB_{k}}{1-B_{k}^{2}}\frac{\partial B_{k}}{\partial D}
+		-\frac{N}{1-B_{k}^{2}}\left(B_{k}\frac{\partial^{2} B_{k}}{\partial A_{k}\partial D}
+		+ \frac{\partial B_{k}}{\partial A_{k}}\frac{\partial B_{k}}{\partial D}
+		\frac{1+B_{k}^{2}}{1-B_{k}^{2}}
+		\right)\\
+		\frac{\partial^{2}}{\partial D^2}\Phi &=
+		-\frac{N}{1-B_{1}^{2}}\left(B_{1}\frac{\partial^{2} B_{1}}{\partial D^{2}}
+		+ \left(\frac{\partial B_{1}}{\partial D}\right)^{2}
+		\frac{1+B_{1}^{2}}{1-B_{1}^{2}}
+		\right)
+		-\frac{N}{1-B_{2}^{2}}\left(B_{2}\frac{\partial^{2} B_{2}}{\partial D^{2}}
+		+ \left(\frac{\partial B_{2}}{\partial D}\right)^{2}
+		\frac{1+B_{2}^{2}}{1-B_{2}^{2}}
+		\right)\\
+	\end{aligned}
+\end{equation}
 \subsection{Validation by Simulation}
 In this section, we create artifical correlated time-series employing the method mentioned in \ref{sec_CO} to validate our Maximum-Likelihood method against parameter estimation by Markov-Chain Monte-Carlo methods.  For the following plots, we created 400 correlated time-series pairs for Pearson Correlation coefficients of $0.9$, $0.5$ and $0.25$ for $N=1000$ and $N=10000$.  Since the problem is symmetric with respect to the sign of the correlation coefficient we don't need to simulate negative correlation coefficients.
 

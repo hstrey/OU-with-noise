@@ -71,7 +71,7 @@ May be entered using the \verb+\pacs{#1}+ command.
 %\tableofcontents
 \onecolumngrid
 \subsection{Introduction}
-In many fields of science we observe time-series of a fluctuating quantitiy: local density fluctuations of a liquid or gas, thermal fluctuations of a bead in an optical trap, thermal fluctuations of soft membranes, or fluctuations of neural activity as measured by fMRI.  In this article, we are exploring how to characterize correlations between two such time-series taking into account that the time series exhibit a relaxation time (memory).  In particluar, we will restrict ourselves to the simplest random process that results in a fluctuating time series with a characteristic relaxation time: the Ornstein-Uhlenbeck (OU) process.  A OU process with mean zero can be expressed by the following Langevin equation:
+In many fields of science we observe time-series of a fluctuating quantity: local density fluctuations of a liquid or gas, thermal fluctuations of a bead in an optical trap, thermal fluctuations of soft membranes, or fluctuations of neural activity as measured by fMRI.  In this article, we are exploring how to characterize correlations between two such time-series taking into account that the time series exhibit a relaxation time (memory).  In particluar, we will restrict ourselves to the simplest random process that results in a fluctuating time series with a characteristic relaxation time: the Ornstein-Uhlenbeck (OU) process.  A OU process with mean zero can be expressed by the following Langevin equation:
 \begin{equation}
 \dot x =  - \frac{k}{\gamma }x + \frac{1}{\gamma }\xi(t)
 \label{model}
@@ -185,7 +185,8 @@ From these three equations we need to find $A_{1}$,$A_{2}$ and $D$, which can be
 		+ \frac{N-1}{1-B_{k}^{2}}\left(B_{k}\frac{\partial^{2} B_{k}}{\partial A_{k}^{2}}
 		+ \left(\frac{\partial B_{k}}{\partial A_{k}}\right)^{2}
 		\frac{1+B_{k}^{2}}{1-B_{k}^{2}}\right)
-		-\frac{1}{2A_{k}}\frac{\partial^{2}Q_{k}(B_{k})}{\partial A_{k}^{2}}\\
+		-\frac{1}{2A_{k}}\frac{\partial^{2}Q_{k}(B_{k})}{\partial A_{k}^{2}}
+		+\frac{1}{A_{k}}\frac{\partial Q_{k}(B_{k})}{\partial A_{k}}\\
 		\frac{\partial^{2}}{\partial A_{k}\partial D}\Phi &= \frac{1}{2A_{k}^{2}}\frac{\partial Q_{k}(B_{k})}{\partial D}
 		-\frac{1}{2A_{k}}\frac{\partial^{2} Q_{k}(B_{k})}{\partial A_{k}\partial D}
 		+ \frac{N-1}{1-B_{k}^{2}}\left(B_{k}\frac{\partial^{2} B_{k}}{\partial A_{k}\partial D}
@@ -244,24 +245,17 @@ From this, we can express the Hessian using the following second derivatives:
 \begin{equation}
 	\begin{aligned}
 		\frac{\partial^{2}}{\partial A_{k}^2}\Phi &= -\frac{N}{2A_{k}^{2}} 
-		- \frac{N}{1-B_{k}^{2}}\left(B_{k}\frac{\partial^{2} B_{k}}{\partial A_{k}^{2}}
-		+ \left(\frac{\partial B_{k}}{\partial A_{k}}\right)^{2}
-		\frac{1+B_{k}^{2}}{1-B_{k}^{2}}\right)\\
+		- \frac{N}{(1-B_{k}^{2})^{2}}\left(\frac{\partial B_{k}}{\partial A_{k}}\right)^{2}
+		\left(1+B_{k}^{2}+\frac{6B_{k}}{1+B_{k}}\right)+\frac{2NB_{k}}{1-B_{k}^{2}}\frac{\partial B_{k}}{\partial A_{k}}\\
 		\frac{\partial^{2}}{\partial A_{k}\partial D}\Phi &=
 		\frac{NB_{k}}{1-B_{k}^{2}}\frac{\partial B_{k}}{\partial D}
-		-\frac{N}{1-B_{k}^{2}}\left(B_{k}\frac{\partial^{2} B_{k}}{\partial A_{k}\partial D}
-		+ \frac{\partial B_{k}}{\partial A_{k}}\frac{\partial B_{k}}{\partial D}
-		\frac{1+B_{k}^{2}}{1-B_{k}^{2}}
-		\right)\\
+		-\frac{N}{(1-B_{k}^{2})^{2}}\frac{\partial B_{k}}{\partial A_{k}}\frac{\partial B_{k}}{\partial D}
+		\left(1+B_{k}^{2}+\frac{6B_{k}}{1+B_{k}}\right)\\
 		\frac{\partial^{2}}{\partial D^2}\Phi &=
-		-\frac{N}{1-B_{1}^{2}}\left(B_{1}\frac{\partial^{2} B_{1}}{\partial D^{2}}
-		+ \left(\frac{\partial B_{1}}{\partial D}\right)^{2}
-		\frac{1+B_{1}^{2}}{1-B_{1}^{2}}
-		\right)
-		-\frac{N}{1-B_{2}^{2}}\left(B_{2}\frac{\partial^{2} B_{2}}{\partial D^{2}}
-		+ \left(\frac{\partial B_{2}}{\partial D}\right)^{2}
-		\frac{1+B_{2}^{2}}{1-B_{2}^{2}}
-		\right)\\
+		- \frac{N}{(1-B_{1}^{2})^{2}}\left(\frac{\partial B_{1}}{\partial D}\right)^{2}
+		\left(1+B_{1}^{2}+\frac{6B_{1}}{1+B_{1}}\right)
+		- \frac{N}{(1-B_{2}^{2})^{2}}\left(\frac{\partial B_{2}}{\partial D}\right)^{2}
+		\left(1+B_{2}^{2}+\frac{6B_{2}}{1+B_{2}}\right)\\
 	\end{aligned}
 \end{equation}
 \subsection{Validation by Simulation}

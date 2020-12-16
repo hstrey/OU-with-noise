@@ -77,7 +77,7 @@ In many fields of science we observe time-series of a fluctuating quantity: loca
 \label{model}
 \end{equation}
 where k is the spring constant, $\gamma$ is the friction coefficient and $\xi(t)$ is a randomly fluctuating force.  
-We recently published a maximum likelihood method to estimate parameters from an OU process time series, and here we attempt the same for coupled OU processes.
+We and others have recently published a maximum likelihood method to estimate parameters from an OU process time series \cite{RN91,RN51,RN62}, and here we attempt the same for coupled OU processes.
 \subsection{Coupled Oscillators}\label{sec_CO}
 Here we consider a system of two overdamped oscillators, characterized by a friction coefficient $\gamma$ and spring constant $k$, that are coupled by a spring with a spring constant $c$.  The Langevin equations can be written in the following way:
 \begin{equation}
@@ -93,7 +93,7 @@ This system can be decoupled by the two eigenfunctions $2y_{1}=x_{1}+x_{2}$ and 
 		\dot{y_2} &= -\frac{k+c}{\gamma}y_{2} +\frac{1}{\gamma}\xi_{4}(t)
 	\end{aligned}
 \end{equation}
-where $y_{1}(t)$ and $y_{2}(t)$ are two Ornstein-Uhlenbeck processes with different relaxation rates.  The equipartition theorem yields $<y_{1}^{2}> = A_{1} = \frac{k_{B}T}{k}$ and $<y_{2}^{2}> = A_{2} = \frac{k_{B}T}{k+c}$.  The other important relationships are: diffusion coefficient $D=\frac{k_{B}T}{\gamma}$, relaxation times $\tau_{1}=\frac{A_{1}}{D}$ and $\tau_{2}=\frac{A_{2}}{D}$. If the friction coefficients $\gamma$ are different for $x_{1}$ and $x_{2}$ one can still decouple the system of differential equations by finding the eigenvectors and eigenvalues.  For simplicity we assume that both processes have the same friction coefficient or diffusion coefficient $D$.
+where $y_{1}(t)$ and $y_{2}(t)$ are two Ornstein-Uhlenbeck processes with different relaxation rates.  The equipartition theorem yields $<y_{1}^{2}> = A_{1} = \frac{k_{B}T}{k}$ and $<y_{2}^{2}> = A_{2} = \frac{k_{B}T}{k+c}$.  The other important relationships are: diffusion coefficient $D=\frac{k_{B}T}{\gamma}$, relaxation times $\tau_{1}=\frac{A_{1}}{D}$ and $\tau_{2}=\frac{A_{2}}{D}$. If the friction coefficients $\gamma$ are different for $x_{1}$ and $x_{2}$ one can still decouple the system of differential equations by finding the eigenvectors and eigenvalues \cite{RN95}.  For simplicity we assume that both processes have the same friction coefficient or diffusion coefficient $D$.
 
 In many fields, the Pearson Correlation Coefficient $\rho$ is used to characterize the correlation between two time-series.  The connection between our coupling coefficient $c$ and $\rho$ is:
 \begin{equation}
@@ -186,7 +186,12 @@ From these three equations we need to find $A_{1}$,$A_{2}$ and $D$, which can be
 		+ \left(\frac{\partial B_{k}}{\partial A_{k}}\right)^{2}
 		\frac{1+B_{k}^{2}}{1-B_{k}^{2}}\right)
 		-\frac{1}{2A_{k}}\frac{\partial^{2}Q_{k}(B_{k})}{\partial A_{k}^{2}}
-		+\frac{1}{A_{k}}\frac{\partial Q_{k}(B_{k})}{\partial A_{k}}\\
+		+\frac{1}{A_{k}^{2}}\frac{\partial Q_{k}(B_{k})}{\partial A_{k}}\\
+		&=-\frac{N}{2A_{k}^{2}}
+		+ \frac{N-1}{1-B_{k}^{2}}\left(B_{k}\frac{\partial^{2} B_{k}}{\partial A_{k}^{2}}
+		+ \left(\frac{\partial B_{k}}{\partial A_{k}}\right)^{2}
+		\frac{1+B_{k}^{2}}{1-B_{k}^{2}}+\frac{2B_{k}}{A_{k}}\frac{\partial B_{k}}{\partial A_{k}}\right)
+		-\frac{1}{2A_{k}}\frac{\partial^{2}Q_{k}(B_{k})}{\partial A_{k}^{2}}\\
 		\frac{\partial^{2}}{\partial A_{k}\partial D}\Phi &= \frac{1}{2A_{k}^{2}}\frac{\partial Q_{k}(B_{k})}{\partial D}
 		-\frac{1}{2A_{k}}\frac{\partial^{2} Q_{k}(B_{k})}{\partial A_{k}\partial D}
 		+ \frac{N-1}{1-B_{k}^{2}}\left(B_{k}\frac{\partial^{2} B_{k}}{\partial A_{k}\partial D}
@@ -225,7 +230,7 @@ with
 	\end{aligned}
 \end{equation}
 Using these terms, we can now express the Hessian $H$ as:
-\begin{equation}H\Phi=
+\begin{equation}H=
 \begin{bmatrix} 
 \frac{\partial^{2}}{\partial A_{1}^2}\Phi & 0 & \frac{\partial^{2}}{\partial A_{1}\partial D}\Phi \\
 0 & \frac{\partial^{2}}{\partial A_{2}^2}\Phi & \frac{\partial^{2}}{\partial A_{2}\partial D}\Phi \\
@@ -235,20 +240,20 @@ Using these terms, we can now express the Hessian $H$ as:
 whose negative inverse determines the parameter's covariance matrix $C = -H^{-1}(A_{1,max},A_{2,max},D_{max})$. In order to get a better sense of how the parameter estimation errors behave we can calculate the expectation values of the second derivaties considering $N\rightarrow \infty$: $\left\langle a_{k,EP} \right\rangle=2A_{k}$,$\left\langle a_{k,SS} \right\rangle=(N-2)A_{k}$, and $\left\langle a_{k,C} \right\rangle=(N-1)A_{k}B_{k}$.  This results in the following expectation values of the derivatives of $Q_{k}(B_{k})$:
 \begin{equation}
 	\begin{aligned}
-	\left\langle Q_{k}(B_{k})\right\rangle &= NA\\
+	\left\langle Q_{k}(B_{k})\right\rangle &= NA_{k}\\
 	\left\langle\frac{\partial}{\partial B_{k}}Q_{k}(B_{k})\right\rangle &=  \frac{2NA_{k}B_{k}}{1-B_{k}^{2}}\\
-	\left\langle\frac{\partial^{2}Q_{k}(B_{k})}{\partial B_{k}^{2}}\right\rangle &= \frac{4NA_{k}(1+B_{k}^{2})}{(1-B_{k}^{2})^{2}}
-	+\frac{12NA_{k}B_{k}(1-B_{k})}{(1-B_{k}^{2})^{3}}
+	\left\langle\frac{\partial^{2}Q_{k}(B_{k})}{\partial B_{k}^{2}}\right\rangle &= 
+	-\frac{4NA_{k}}{(1-B_{k}^{2})^{3}}\left(B_{k}^{4}+3B_{k}^{2}-3B_{k}-1\right)
 	\end{aligned}
 \end{equation}
 From this, we can express the Hessian using the following second derivatives:
-\begin{equation}
+\begin{equation}\label{eqNinfty}
 	\begin{aligned}
 		\frac{\partial^{2}}{\partial A_{k}^2}\Phi &= -\frac{N}{2A_{k}^{2}} 
 		- \frac{N}{(1-B_{k}^{2})^{2}}\left(\frac{\partial B_{k}}{\partial A_{k}}\right)^{2}
-		\left(1+B_{k}^{2}+\frac{6B_{k}}{1+B_{k}}\right)+\frac{2NB_{k}}{1-B_{k}^{2}}\frac{\partial B_{k}}{\partial A_{k}}\\
+		\left(1+B_{k}^{2}+\frac{6B_{k}}{1+B_{k}}\right)+\frac{2NB_{k}}{A_{k}(1-B_{k}^{2})}\frac{\partial B_{k}}{\partial A_{k}}\\
 		\frac{\partial^{2}}{\partial A_{k}\partial D}\Phi &=
-		\frac{NB_{k}}{1-B_{k}^{2}}\frac{\partial B_{k}}{\partial D}
+		\frac{NB_{k}}{A_{k}(1-B_{k}^{2})}\frac{\partial B_{k}}{\partial D}
 		-\frac{N}{(1-B_{k}^{2})^{2}}\frac{\partial B_{k}}{\partial A_{k}}\frac{\partial B_{k}}{\partial D}
 		\left(1+B_{k}^{2}+\frac{6B_{k}}{1+B_{k}}\right)\\
 		\frac{\partial^{2}}{\partial D^2}\Phi &=
@@ -258,6 +263,23 @@ From this, we can express the Hessian using the following second derivatives:
 		\left(1+B_{2}^{2}+\frac{6B_{2}}{1+B_{2}}\right)\\
 	\end{aligned}
 \end{equation}
+In Fig. \ref{fig:error_fig} we plot the relative errors of $A_{1},A_{2}$ and $C$ as a function of $\Delta t/\tau_{1}$ and $\rho$ for large $N$ ($N=10^{6}$) using eqs. \ref{eqNinfty}.  For example, in Fig.\ref{fig:error_fig} \ref{fig:error_A} we can see that the optimal sampling interval as given by $\Delta t/\tau_{1}$ is reducing as $\rho$ is increasing.  This is most likely due to the fact that the relaxation $\tau_{2}$ is decreasing as $\rho$ is increasing which will affect the uncertainty of both $A_{1}$ and $A_{2}$.  We also observe a shift in behavior for larger $\rho>0.25$ where no minimum $\Delta t/\tau_{1}$ for $A_{1}$ and $C$ exists.  This is in contrast to our finding for a single OU process \cite{RN91} where the relaxation time $\tau$ had a minimum of approximatly $\delta t = 0.7\tau$ and $dA$ continuously decreased as $\Delta t/\tau$ decreased.
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.4\textwidth}
+        \includegraphics[width=\textwidth]{dA.png}
+        \caption{Amplitude errors $dA1$ and $dA2$ as function of $\Delta t/\tau$}
+        \label{fig:error_A}
+    \end{subfigure}
+    ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
+      %(or a blank line to force the subfigure onto a new line)
+    \begin{subfigure}[b]{0.4\textwidth}
+        \includegraphics[width=\textwidth]{dC.png}
+        \caption{Relative coupling coefficient error $dC$ as function of $\Delta t/\tau$}
+        \label{fig:error_C}
+    \end{subfigure}
+    \caption{Dependence of relative errors on $\Delta t/\tau$ for large $N$ ($N=10^{6}$) using eqs. \ref{eqNinfty}}\label{fig:error_fig}
+\end{figure}
 \subsection{Validation by Simulation}
 In this section, we create artifical correlated time-series employing the method mentioned in \ref{sec_CO} to validate our Maximum-Likelihood method against parameter estimation by Markov-Chain Monte-Carlo methods.  For the following plots, we created 400 correlated time-series pairs for Pearson Correlation coefficients of $0.9$, $0.5$ and $0.25$ for $N=1000$ and $N=10000$.  Since the problem is symmetric with respect to the sign of the correlation coefficient we don't need to simulate negative correlation coefficients.
 

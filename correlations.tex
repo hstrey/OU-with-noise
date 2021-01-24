@@ -28,6 +28,7 @@
 \usepackage{subcaption}
 \usepackage{float}
 \usepackage{tikz}
+\usepackage{booktabs}
 %\usepackage{breqn}
 \usetikzlibrary{calc,arrows.meta,positioning}
 %\usepackage{hyperref}% add hypertext capabilities
@@ -47,8 +48,14 @@
 
 \preprint{APS/123-QED}
 
-\title{Parameter estimation for correlated Ornstein-Uhlenbeck time-series}
+\title{Parameter estimation for correlated Ornstein-Uhlenbeck time-series with application in neuroscience}
 
+\author{Rajat Kumar}
+ \affiliation{Biomedical Engineering Department, Stony Brook University, Stony Brook NY 11794-5281.}%Lines break automatically or can be forced with \\
+\author{Lilianne Mujica-Parodi}
+ \affiliation{Biomedical Engineering Department and Laufer Center for Physical and Quantitative Biology, Stony Brook University, Stony Brook NY 11794-5281.}
+  \affiliation{Martinos Center, Massachusetts General Hospital and Harvard University, Boston, MA}
+ %Lines break automatically or can be forced with \\
 \author{Helmut H. Strey}
  \affiliation{Biomedical Engineering Department and Laufer Center for Physical and Quantitative Biology, Stony Brook University, Stony Brook NY 11794-5281.}%Lines break automatically or can be forced with \\
 
@@ -56,6 +63,7 @@
              %  but any date may be explicitly specified
 
 \begin{abstract}
+In this article, we develop a Maximum likelihood (ML) approach to estimate parameters from correlated time traces that originate from coupled Ornstein-Uhlenbeck processes.  The most common technique to characterize the correlation between time-series is to calculate the Pearson correlation coefficient.  Here we show that for time series with memory (or a characteristic relaxation time), our method gives more reliable results, but also results in coupling coefficients and their uncertainties given the data.  We investigate how these uncertainties depend on the number of samples, the relaxation times and sampling time.  To validate our analytic results, we performed simulations over a wide range of correlation coefficients both using our maximum likelihood solutions and Markov-Chain Monte-Carlo (MCMC) simulations.  We found that both ML and MCMC result in the same parameter estimations.  We also found that when analyzing the same data, the ML and MCMC uncertainties are strongly correlated, while ML underestimates the uncertainties by a factor of 1.5 to 3 over a large range of parameters.  For large datasets, we can therfore use the less computationally expensive maximum likelihood method to run over the whole dataset, and then we can use MCMC on a few samples to determine the factor by which the ML method underestimates the uncertainties.  To illustrate the application of our method, we apply it to time series of brain activation using fMRI measurements of the human default mode network.  We show that our method significantly improves the interpretation of multi-subject measurements of correlations between brain regions by providing parameter confidence intervals for individual measurements, which allows for distinguishing between the variance from differences between subjects from variance due to measurement error.
 \begin{description}
 \item[PACS numbers]
 May be entered using the \verb+\pacs{#1}+ command.
@@ -71,15 +79,15 @@ May be entered using the \verb+\pacs{#1}+ command.
 %\tableofcontents
 \onecolumngrid
 \subsection{Introduction}
-In many fields of science we observe time-series of a fluctuating quantity: local density fluctuations of a liquid or gas, thermal fluctuations of a bead in an optical trap, thermal fluctuations of soft membranes, or fluctuations of neural activity as measured by fMRI.  In this article, we are exploring how to characterize correlations between two such time-series taking into account that the time series exhibit a relaxation time (memory).  In particluar, we will restrict ourselves to the simplest random process that results in a fluctuating time series with a characteristic relaxation time: the Ornstein-Uhlenbeck (OU) process.  A OU process with mean zero can be expressed by the following Langevin equation:
+In many fields of science we observe time-series of a fluctuating quantity: local density fluctuations of a liquid or gas, thermal fluctuations of a bead in an optical trap, thermal fluctuations of soft membranes, or fluctuations of neural activity as measured by fMRI.  In this article, we are developing a method to characterize correlations between two time-series that exhibit short-term memory or relaxation.  In particluar, we will restrict ourselves to the simplest random process that results in a fluctuating time series with a characteristic relaxation time: the Ornstein-Uhlenbeck (OU) process \cite{RN28}.  A OU process with mean zero can be expressed by the following Langevin equation:
 \begin{equation}
 \dot x =  - \frac{k}{\gamma }x + \frac{1}{\gamma }\xi(t)
 \label{model}
 \end{equation}
 where k is the spring constant, $\gamma$ is the friction coefficient and $\xi(t)$ is a randomly fluctuating force.  
-We and others have recently published a maximum likelihood method to estimate parameters from an OU process time series \cite{RN91,RN51,RN62}, and here we attempt the same for coupled OU processes.
+We and others have recently published maximum likelihood methods to estimate parameters from an OU process time series \cite{RN91,RN51,RN62}, and here we attempt the same for coupled OU processes.
 \subsection{Coupled Oscillators}\label{sec_CO}
-Here we consider a system of two overdamped oscillators, characterized by a friction coefficient $\gamma$ and spring constant $k$, that are coupled by a spring with a spring constant $c$.  The Langevin equations can be written in the following way:
+We consider a system of two overdamped oscillators, characterized by a friction coefficient $\gamma$ and spring constant $k$, that are coupled by a spring with a spring constant $c$.  The Langevin equations can be written in the following way:
 \begin{equation}
 	\begin{aligned}
 		\dot{x_1} &= -\frac{k}{\gamma}x_{1}-\frac{c}{\gamma}(x_{1}-x_{2}) +\frac{1}{\gamma}\xi_{1}(t)\\
@@ -110,12 +118,12 @@ We can extend this procedure to negative coupling coefficients.  For example, $c
 \resizebox{.3\textwidth}{!}{%
 \includegraphics[height=3cm]{corr.png}%
 }
-\caption{Fig.1: Relationship between coupling coefficient $C$ and Pearson correlation coefficient $\rho$.  The solid line represents eq. \ref{Crho}, whereas the data points represent the parameter estimation by MCMC simulation on artificial data of length $N=1000$.  The errorbars indicate the distribution of estimated $C$s.}\label{fig:corr}
+\caption{Relationship between coupling coefficient $C$ and Pearson correlation coefficient $\rho$.  The solid line represents eq. \ref{Crho}, whereas the data points represent the parameter estimation by MCMC simulation on artificial data of length $N=1000$.  The errorbars indicate the distribution of estimated $C$s.}\label{fig:corr}
 \end{center}
 \end{figure}
 
 \subsection{Maximum likelihood solution}
-In this section we will express the likelihood of two correlated time-series $x_1$ and $x_2$ in terms of $A_{1}$, $A_{2}$ and $B_{k}\equiv B(\Delta t,D,A_{k})=\exp\left(-\frac{D}{A_{k}}\Delta t\right)$ assuming uniform priors for all parameters.
+In this section we will express the likelihood (see for example \cite{RN42}) of two correlated time-series $x_1$ and $x_2$ in terms of $A_{1}$, $A_{2}$ and $B_{k}\equiv B(\Delta t,D,A_{k})=\exp\left(-\frac{D}{A_{k}}\Delta t\right)$ assuming uniform priors for all parameters.
 \begin{eqnarray}
 	&&p\left( \left\{x_{1,i}(t_i)\right\},\left\{x_{2,i}(t_i)\right\} \left| D, A_{1},A_{2} \right.\right) \propto
 	\frac{1}{\sqrt {2 \pi A_{1}}^{N} }
@@ -237,7 +245,7 @@ Using these terms, we can now express the Hessian $H$ as:
 \frac{\partial^{2}}{\partial A_{1}\partial D}\Phi & \frac{\partial^{2}}{\partial A_{2}\partial D}\Phi & \frac{\partial^{2}}{\partial D^2}\Phi\\
 \end{bmatrix}
 \end{equation}
-whose negative inverse determines the parameter's covariance matrix $C = -H^{-1}(A_{1,max},A_{2,max},D_{max})$. In order to get a better sense of how the parameter estimation errors behave we can calculate the expectation values of the second derivaties considering $N\rightarrow \infty$: $\left\langle a_{k,EP} \right\rangle=2A_{k}$,$\left\langle a_{k,SS} \right\rangle=(N-2)A_{k}$, and $\left\langle a_{k,C} \right\rangle=(N-1)A_{k}B_{k}$.  This results in the following expectation values of the derivatives of $Q_{k}(B_{k})$:
+whose negative inverse determines the parameter's covariance matrix $C = -H^{-1}(A_{1,max},A_{2,max},D_{max})$ (see for example \cite{RN42}). In order to get a better sense of how the parameter estimation errors behave we can calculate the expectation values of the second derivaties considering $N\rightarrow \infty$: $\left\langle a_{k,EP} \right\rangle=2A_{k}$,$\left\langle a_{k,SS} \right\rangle=(N-2)A_{k}$, and $\left\langle a_{k,C} \right\rangle=(N-1)A_{k}B_{k}$.  This results in the following expectation values of the derivatives of $Q_{k}(B_{k})$:
 \begin{equation}
 	\begin{aligned}
 	\left\langle Q_{k}(B_{k})\right\rangle &= NA_{k}\\
@@ -263,7 +271,7 @@ From this, we can express the Hessian using the following second derivatives:
 		\left(1+B_{2}^{2}+\frac{6B_{2}}{1+B_{2}}\right)\\
 	\end{aligned}
 \end{equation}
-In Fig. \ref{fig:error_fig} we plot the relative errors of $A_{1},A_{2}$ and $C$ as a function of $\Delta t/\tau_{1}$ and $\rho$ for large $N$ ($N=10^{6}$) using eqs. \ref{eqNinfty}.  For example, in Fig.\ref{fig:error_fig} \ref{fig:error_A} we can see that the optimal sampling interval as given by $\Delta t/\tau_{1}$ is reducing as $\rho$ is increasing.  This is most likely due to the fact that the relaxation $\tau_{2}$ is decreasing as $\rho$ is increasing which will affect the uncertainty of both $A_{1}$ and $A_{2}$.  We also observe a shift in behavior for larger $\rho>0.25$ where no minimum $\Delta t/\tau_{1}$ for $A_{1}$ and $C$ exists.  This is in contrast to our finding for a single OU process \cite{RN91} where the relaxation time $\tau$ had a minimum of approximatly $\delta t = 0.7\tau$ and $dA$ continuously decreased as $\Delta t/\tau$ decreased.
+These equations allow us to express how the uncertainties/errors of the parameters depend on the sampling interval $\Delta t/\tau$ given that we measure $N$ samples.  In Fig. \ref{fig:error_fig} we plot the relative errors of $A_{1},A_{2}$ and $C$ as a function of $\Delta t/\tau_{1}$ and $\rho$ for large fixed $N$ ($N=10^{6}$) using eqs. \ref{eqNinfty}.  For example, in Fig.\ref{fig:error_A} we can see that the optimal sampling interval as given by $\Delta t/\tau_{1}$ is reducing as $\rho$ is increasing.  This is most likely due to the fact that the relaxation $\tau_{2}$ is decreasing as $\rho$ is increasing which will affect the uncertainty of both $A_{1}$ and $A_{2}$.  We also observe a shift in behavior for larger $\rho>0.25$ where no minimum $\Delta t/\tau_{1}$ for $A_{1}$ and $C$ exists.  This is in contrast to our finding for a single OU process \cite{RN91} where the relaxation time $\tau$ had a minimum of approximatly $\Delta t = 0.7\tau$ and $dA$ continuously decreased as $\Delta t/\tau$ decreased.
 \begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.4\textwidth}
@@ -281,10 +289,98 @@ In Fig. \ref{fig:error_fig} we plot the relative errors of $A_{1},A_{2}$ and $C$
     \caption{Dependence of relative errors on $\Delta t/\tau$ for large $N$ ($N=10^{6}$) using eqs. \ref{eqNinfty}}\label{fig:error_fig}
 \end{figure}
 \subsection{Validation by Simulation}
-In this section, we create artifical correlated time-series employing the method mentioned in \ref{sec_CO} to validate our Maximum-Likelihood method against parameter estimation by Markov-Chain Monte-Carlo methods.  For the following plots, we created 400 correlated time-series pairs for Pearson Correlation coefficients of $0.9$, $0.5$ and $0.25$ for $N=1000$ and $N=10000$.  Since the problem is symmetric with respect to the sign of the correlation coefficient we don't need to simulate negative correlation coefficients.
+In this section, we create artifical correlated time-series employing the method mentioned in \ref{sec_CO} to validate our Maximum-Likelihood method against parameter estimation by Markov-Chain Monte-Carlo (MCMC) methods \cite{RN46}.  Probabilistic calculations using MCMC were carried out in python and Julia, using the anaconda distribution of python \cite{anaconda} with PYMC3 \cite{RN75} and Julia 1.53 \cite{bezanson2017julia} with Turing.jl \cite{ge2018t}.  For the following table and figures, we created 400 correlated time-series pairs for Pearson Correlation coefficients of $0.9$, $0.5$, $0.25$, and $0.1$ for $N=1000$ at $D=1,A_{1}=1,\Delta t = 0.3$.  Since the problem is symmetric with respect to the sign of the correlation coefficient we don't need to simulate negative correlation coefficients. Fig. \ref{fig:Arho05} shows the proability distributions of $A_1$ and $A_2$ for $N=1000$ and $\rho=0.5$ estimated by maximum likelihood (ML) and Markov-Chain Monte-Carlo (MCMC). The results of the simulations are summarized in Table \ref{simtable}.  In terms of uncertainties we find that MCMC correctly estimates parameter uncertainties consistent with the distribution over a large sample, but that the maximum likelihood method underestimates the uncertainty by a constant factor that depends on the degree of correlation $\rho$ or $C$. In Fig. \ref{fig:Acorr} we show using a scatter plot that the individual uncertainties of MCMC and ML are correlated.  This fact is important since MCMC is much more computationally expensive.  For large datasets, we can use the maximum likelihood method to run over the whole dataset, and then we can use MCMC on a few samples to determine the factor by which the ML method underestimates the uncertainties.  In our example, maximum likelihood underestimates the uncertainties by a factor of 1.5-2 over a wide range of $\rho$.  We believe this underestimation results from the fact that the distributions in Fig. \ref{fig:Arho05} are not Gaussian.  The ML method assumes that all posterior distributions are Gaussian and that the width can be determined by the second derivative of the log likelihood.  This is clearly not the case.  The fact that we underestimate the uncertainties indicates that the curvature of our distribution at the maximum is greater than a corresponding Gaussian distribution.
+\begin{table}
+\begin{tabular}{l|c|c|c|c|c|c|c|c}
+	\hline
+	$\rho$     & $A_1$ (MCMC) & $A_1$ (ML) & $A_2$ (MCMC) & $A_2$ (ML) & $C$ (MCMC) &  $C$ (ML) & $dC$ (MCMC) &  $dC$ (ML)\\
+	\hline
+	0.1  & $1.02\pm0.09$ & $1.00\pm0.08$ & $0.84\pm0.07$ & $0.82\pm0.06$ & $0.24\pm0.15$ & $0.23\pm0.14$ & $0.14\pm0.018$  & $0.068\pm0.0076$ \\
+	0.25 & $1.02\pm0.09$ & $1.00\pm0.08$ & $0.61\pm0.04$ & $0.60\pm0.04$ & $0.70\pm0.18$    & $0.67\pm0.17$   & $0.19\pm0.02$   & $0.09\pm0.009$\\
+	0.5 & $1.02\pm0.08$  & $1.00\pm0.08$     & $0.33\pm0.02$    &  $0.33\pm0.02$   & $2.00\pm0.29$ & $2.05\pm0.30$ & $0.31\pm0.039$ & $0.144\pm0.013$ \\
+	0.75  & $1.02\pm0.08$ & $1.00\pm0.08$ & $0.145\pm0.006$  & $0.144\pm0.005$ & $6.1\pm0.6$ & $6.0\pm0.6$ & $0.69\pm0.08$  & $0.37\pm0.03$\\
+	0.9  & $1.02\pm0.08$ & $1.00\pm0.08$ & $0.053\pm0.002$ & $0.053\pm0.00003$ & $18.4\pm1.9$ & $17.97\pm1.5$ & $1.9\pm0.24$ & $1.3\pm0.11$\\
+	\hline
+\end{tabular}
+\caption{Comparison of parameter estimates using maximum likelihood and Markov-Chain Monte-Carlo methods for different $\rho$ at $D=1,A_{1}=1,\Delta t = 0.3,N=1000$}
+\label{simtable}
+\end{table}
 
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.4\textwidth}
+        \includegraphics[width=\textwidth]{A1kde05.png}
+        \caption{$p(A_{1})$ vs $A_1$}
+        \label{fig:A1rho05}
+    \end{subfigure}
+    ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
+      %(or a blank line to force the subfigure onto a new line)
+    \begin{subfigure}[b]{0.4\textwidth}
+        \includegraphics[width=\textwidth]{A2kde05.png}
+        \caption{$p(A_{2})$ vs $A_2$}
+        \label{fig:A2rho05}
+    \end{subfigure}
+    \caption{Comparison of MCMC and maximum likelihood for $\rho=0.5$ and $D=1,A_{1}=1,\Delta t = 0.3,N=1000$.  The vertical bar indicates the true expected value}\label{fig:Arho05}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.4\textwidth}
+        \includegraphics[width=\textwidth]{dA1corrkde05.png}
+        \caption{$dA_{1,ML}$ vs $dA_{1,MCMC}$}
+        \label{fig:A1corr}
+    \end{subfigure}
+    ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
+      %(or a blank line to force the subfigure onto a new line)
+    \begin{subfigure}[b]{0.4\textwidth}
+        \includegraphics[width=\textwidth]{dA2corrkde05.png}
+        \caption{$dA_{2,ML}$ vs $dA_{2,MCMC}$}
+        \label{fig:A2corr}
+    \end{subfigure}
+    \caption{Correlation between the uncertainties of A estimated by maximum likelihood and MCMC for $\rho=0.5$ and $D=1,A_{1}=1,\Delta t = 0.3,N=1000$.  The dotted line represents a linear fit.  For this $\rho$ the maximum likelihood underestimates the errors by a factor of 2}\label{fig:Acorr}
+\end{figure}
+
+\subsection{Application to brain activation time-series}
+To illustrate the power of our correlation method, we analyzed fMRI time-series data from control 7T-fMRI resting-state experiments that were taken from \cite{RN98}.  In particular, we extracted neural activation time-series from four brain regions that make up the default mode network \cite{RN99} ( LLP = left lateral parietal cortex, RLP = right lateral parietal cortex, MPFC = medial prefrontal cortex, PCC = posterior cingulate cortex) that activates when not performing a specific task.  Fig. \ref{fig:subject4} shows the time series of a single subject.  Traditially, correlations between brain regions are evaluated using Pearson correlation coefficients.  To ensure that our coupled OU model is applicable, we determined the skewness and kurtosis of all time series to show that they are Gaussian.  None of the distributions had an absolute value of skewness/kurtosis of more than $0.5$, which is considered safe for applying Gaussian statistics (see for example \cite{RN100}).  Next, we have to show that the time series exhibit an exponentially decaying autocorrelation function.  For this, we applied our maximum likelihood method for OU processes to determine the relaxation times for all time series.  We found that $\tau_{MPFC}=4.8 \pm 0.7 sec$, $\tau_{PCC}=4.8 \pm 0.7 sec$, $\tau_{RLP}=4.1 \pm 0.5 sec$, $\tau_{LLP}=3.8 \pm 0.5 sec$.  The decay-times of all brain regions are in within one or two standard deviations of each other, justifying the assumption made in eq. \ref{eq_decoupled}.
+Fig. \ref{fig:coupling_coef} shows the coupling coefficients of five subject estimated by our method.  Here we show the estimates from MCMC, but the same mean values are obtained by using the maximum likelihood method with uncertainties that are about a factor of 3 smaller than the MCMC estimates (see the Discussion in Simulation section).  We chose four of six possible pairings of brain regions to illustrate the additional information that our method provides over Pearson correlations.  By obtaining not only the strength of coupling but also the uncertainties of the value given the data, we can distingish between variance due to measurement and variance due to difference between subjects.  Panel (a) illustrates a case where the uncertainty of the measurements is smaller than the variance of the mean.  In this case this is due to an outlier.  Here the traditional analysis would have sufficient to detect an outlier.  In Panel (b) and (d) the variance of the mean is in between the variances of the individual datapoints and because we know each measurements uncertainty, we can determine how much of the variance of the mean is due to the variance between subjects and due to measurement error.  Panel (c) illustrates a case where the uncertainty of the measurement is larger than variance of the mean.
+
+\begin{figure}[H]
+\begin{center}
+\resizebox{.8\textwidth}{!}{%
+\includegraphics[height=10cm]{subject4.png}%
+}
+\caption{Time series of fMRI-BOLD signals of four brain regions that constitute the default mode network ( LLP = left lateral parietal cortex, RLP = right lateral parietal cortex, MPFC = medial prefrontal cortex, PCC = posterior cingulate cortex) }\label{fig:subject4}
+\end{center}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.4\textwidth}
+        \includegraphics[width=\textwidth]{mpfc_llpMCMC.png}
+        \caption{Coupling coefficients between MPFC and LLP}
+        \label{fig:mpfc_llp}
+    \end{subfigure}
+    ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
+      %(or a blank line to force the subfigure onto a new line)
+    \begin{subfigure}[b]{0.4\textwidth}
+        \includegraphics[width=\textwidth]{mpfc_pccMCMC.png}
+        \caption{Coupling coefficients between MPFC and PCC}
+        \label{fig:mpfc_pcc}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.4\textwidth}
+        \includegraphics[width=\textwidth]{pcc_llpMCMC.png}
+        \caption{Coupling coefficients between PCC and LLP}
+        \label{fig:llp_pcc}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.4\textwidth}
+        \includegraphics[width=\textwidth]{llp_rlpMCMC.png}
+        \caption{Coupling coefficients between LLP and RLP}
+        \label{fig:rlp_llp}
+    \end{subfigure}
+	\caption{Coupling coefficients between default mode network brain regions across several subjects and the mean and standard deviation between subjects.  The coupling coefficients and their uncertainties were determined by MCMC.  We obtained the same mean coupling coefficients using the maximum likelihood method but with uncertainties that are about a factor of 3 smaller than the MCMC estimate.}\label{fig:coupling_coef}
+\end{figure}
+\subsection{Summary}
+In the previous sections we developed and validated a maximum likelihood method to estimate the correlation between time series with an intrinsic relaxation time (OU process).  As compared to Pearson correlation, our method not only estimates the correlation parameter, but also its confidence interval, which in our opinion is the most useful feature of our method.  Knowing the confidence interval of individual measurements allows us to distingish between measurement error (confidence in a single measurement) and the variance that results from the variance of the sample.  In the biological sciences, we often find large biological variance that is manifested in cell-cell variability of genetically identical cells or in the variance in the measurement of brain circuitry between (different subjects) but also within subjects (same subject at different days).  In order to characterize these biological variances, biophysical methods have to be developed that are capable of measuring quantities accurately enough as to distingish between measurement error and biological distributions.  Only of the individual error of a measurement is known we can attempt such a deconvolution.  We hope that our method will help in achieving this goal.
 \begin{acknowledgments}
-We wish to acknowledge funding by the 
+We wish to acknowledge funding by the the National Institute of Drug Abuse (SBIR Phase 1 \& Phase 2 Grant 1R44 DA043277-01) and the National Heart, Lung and Blood Institute (Grant 5U01HL12752202)
 \end{acknowledgments}
 \bibliography{correlations}
 \end{document}

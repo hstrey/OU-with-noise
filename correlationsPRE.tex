@@ -63,13 +63,13 @@
              %  but any date may be explicitly specified
 
 \begin{abstract}
-This article develops a Maximum likelihood (ML) approach to estimate parameters from correlated time traces that originate from coupled Ornstein-Uhlenbeck processes.  The most common technique to characterize the correlation between time-series is to calculate the Pearson correlation coefficient.  Here we show that our method gives more reliable results for time series with memory (or a characteristic relaxation time) and results in coupling coefficients and their uncertainties given the data.  We investigate how these uncertainties depend on the number of samples, the relaxation times, and sampling time.  We performed simulations over a wide range of correlation coefficients using our maximum likelihood solutions and Markov-Chain Monte-Carlo (MCMC) simulations to validate our analytic results.  We found that both ML and MCMC result in the same parameter estimations.  We also found that when analyzing the same data, the ML and MCMC uncertainties are strongly correlated. At the same time, ML underestimates the uncertainties by a factor of 1.5 to 3 over an extensive range of parameters.  For large datasets, we can therefore use the less computationally expensive maximum likelihood method to run over the whole dataset. Then we can use MCMC on a few samples to determine the factor by which the ML method underestimates the uncertainties.  To illustrate our method's application, we apply it to time series of brain activation using fMRI measurements of the human default mode network.  We show that our method significantly improves the interpretation of multi-subject measurements of correlations between brain regions by providing parameter confidence intervals for individual measurements, distinguishing between the variance from differences between subjects from variance due to measurement error.
+Here we develop a Maximum likelihood (ML) approach to estimate parameters and their confidence intervals from correlated time traces originating from coupled Ornstein-Uhlenbeck processes.  We investigate how these uncertainties depend on the number of samples, the relaxation times, and sampling time.  We performed simulations over a wide range of correlation coefficients using our maximum likelihood solutions and Markov-Chain Monte-Carlo (MCMC) simulations to validate our analytic results.  We found that ML and MCMC yield the same parameter estimations while the ML and MCMC confidence intervals are strongly correlated. However, ML underestimates the uncertainties by a factor of 1.5 to 3 over an extensive range of parameters.  To illustrate our method's utility, we apply it to time series of brain activation using fMRI measurements of the human default mode network.  We show that our method significantly improves the interpretation of multi-subject measurements of correlations between brain regions by providing parameter confidence intervals for individual measurements.  This allows us to distinguish between the variance originating from differences between subjects from the variance due to measurement error.
 \end{abstract}
 
 \maketitle
 
 %\tableofcontents
-\onecolumngrid
+%\onecolumngrid
 \subsection{Introduction}
 In many fields of science, a common question arises as to whether two sets of data are linearly correlated.  One of the most straightforward statistical tools for such a case is calculating the Pearson correlation coefficient $\rho$.  The Pearson correlation method assumes that the samples are identically and independently drawn from a bivariate Gaussian distribution.  Unfortunately, the Pearson coefficient is frequently applied to data that falls outside this condition. A pervasive example is the application of Pearson correlations to time-series that are distributed normally but where adjacent time points are not independent.  In this article, we are developing a method to characterize correlations between two time-series that exhibit short-term memory or relaxation.  In particular, we will restrict ourselves to the simplest random process that results in a fluctuating time series with a characteristic relaxation time: the Ornstein-Uhlenbeck (OU) process \cite{RN28}.  A OU process with mean zero can be expressed by the following Langevin equation:
 \begin{equation}
@@ -97,7 +97,9 @@ where $y_{1}(t)$ and $y_{2}(t)$ are two Ornstein-Uhlenbeck processes with differ
 
 In many fields, the Pearson Correlation Coefficient $\rho$ is used to characterize the correlation between two time-series.  The connection between our coupling coefficient $c$ and $\rho$ is:
 \begin{equation}
-	\rho = \frac{\left<x_{1}x_{2}\right>}{\sigma_{1}\sigma_{2}} = \frac{\left<(y_{1}+y_{2})(y_{1}-y_{2})\right>}{\sqrt{\left<(y_{1}+y_{2})^{2}\right>\left<(y_{1}-y_{2})^{2}\right>}} = \frac{\left<y_{1}^{2}\right>-\left<y_{2}^{2}\right>}{\left<y_{1}^{2}\right>+\left<y_{2}^{2}\right>} = \frac{c}{2k+c}
+	\begin{aligned}
+	\rho &= \frac{\left<x_{1}x_{2}\right>}{\sigma_{1}\sigma_{2}}\\ &=\frac{\left<(y_{1}+y_{2})(y_{1}-y_{2})\right>}{\sqrt{\left<(y_{1}+y_{2})^{2}\right>\left<(y_{1}-y_{2})^{2}\right>}} \\ &=\frac{\left<y_{1}^{2}\right>-\left<y_{2}^{2}\right>}{\left<y_{1}^{2}\right>+\left<y_{2}^{2}\right>} = \frac{c}{2k+c}
+	\end{aligned}
 \end{equation}
 As expected, for $c=0$ we obtain $\rho=0$, and $c=\infty$ results in $\rho=1$. Often correlation analysis are performed on normalized samples.  It therefore makes sense to define a unitless coupling coefficient $C=c/k$  which can be calculated by estimating $A_1$ and $A_2$ from the data:
 \begin{equation}\label{Crho}
@@ -107,7 +109,7 @@ We can extend this procedure to negative coupling coefficients.  For example, $c
 
 \begin{figure}[H]
 \begin{center}
-\resizebox{.3\textwidth}{!}{%
+\resizebox{.4\textwidth}{!}{%
 \includegraphics[height=3cm]{corr.png}%
 }
 \caption{Relationship between coupling coefficient $C$ and Pearson correlation coefficient $\rho$.  The solid line represents eq. \ref{Crho}, whereas the data points represent the parameter estimation by MCMC simulation on artificial data of length $N=1000$.  The errorbars indicate the distribution of estimated $C$s.}\label{fig:corr}
@@ -117,23 +119,22 @@ We can extend this procedure to negative coupling coefficients.  For example, $c
 \subsection{Maximum likelihood solution}
 In this section we will express the likelihood (see for example \cite{RN42}) of two correlated time-series $x_1$ and $x_2$ in terms of $A_{1}$, $A_{2}$ and $B_{k}\equiv B(\Delta t,D,A_{k})=\exp\left(-\frac{D}{A_{k}}\Delta t\right)$ assuming uniform priors for all parameters.
 \begin{eqnarray}
-	&&p\left( \left\{x_{1,i}(t_i)\right\},\left\{x_{2,i}(t_i)\right\} \left| D, A_{1},A_{2} \right.\right) \propto
-	\frac{1}{\sqrt {2 \pi A_{1}}^{N} }
-	\frac{1}{{\sqrt {(1-B_{1}^{2})}^{(N-1)} }}\\
+	&&p\left( \left\{x_{1,i}(t_i)\right\},\left\{x_{2,i}(t_i)\right\} \left| D, A_{1},A_{2} \right.\right) \propto \\
+	&&\frac{1}{\sqrt {2 \pi A_{1}}^{N} }
+	\frac{1}{{\sqrt {(1-B_{1}^{2})}^{(N-1)} }}\nonumber\\
 	&&\times\exp \left( -\frac{1}{2A_{1}}\left( {x_{1,1}}^{2} + 
 	\sum\limits_{i=1}^{N-1}\frac{ x_{1,i+1}^{2} - 2x_{1,i+1}x_{1,i}B_{1} +x_{1,i}^{2}B_{1}^{2} }{(1-B_{1}^{2})} \right)\right)\nonumber\\
 	&&\times\frac{1}{\sqrt {2 \pi A_{2}}^{N} }
-	\frac{1}{{\sqrt {(1-B_{2}^{2})}^{(N-1)} }}\\
+	\frac{1}{{\sqrt {(1-B_{2}^{2})}^{(N-1)} }}\nonumber\\
 	&&\times\exp \left( -\frac{1}{2A_{2}}\left( {x_{2,1}}^{2} + 
 	\sum\limits_{i=1}^{N-1}\frac{ x_{2,i+1}^{2} - 2x_{2,i+1}x_{1,i}B_{2} +x_{2,i}^{2}B_{2}^{2} }{(1-B_{2}^{2})} \right)\right)\nonumber
 \end{eqnarray}
 In order to find the maximum likelihood it is convenient to take the logarithm of $p$ and then take the derivatives with respect to $A_{1}$, $A_{2}$ and $D$.
-\begin{equation}
-\begin{aligned}
-	\Phi &= ln \left( p\left( \left\{x_{1,i}(t_i)\right\},\left\{x_{2,i}(t_i)\right\} \left|  D, A_{1},A_{2} \right.\right) \right)\\\\
-	&= C - \frac{N}{2} ln(A_{1}) - \frac{N}{2} ln(A_{2})- \frac{N-1}{2}ln \left( 1-B_{1}^{2}\right) - \frac{N-1}{2}ln \left( 1-B_{2}^{2}\right) -\frac{1}{2A_{1}}Q_{1}(B_{1})-\frac{1}{2A_{2}}Q_{2}(B_{2})
-\end{aligned}
-\end{equation}
+\begin{eqnarray}
+	&&\Phi = ln \left( p\left( \left\{x_{1,i}(t_i)\right\},\left\{x_{2,i}(t_i)\right\} \left|  D, A_{1},A_{2} \right.\right) \right)\\
+	&&= C - \frac{N}{2} ln(A_{1}) - \frac{N}{2} ln(A_{2})- \frac{N-1}{2}ln \left( 1-B_{1}^{2}\right) \nonumber\\
+	&&- \frac{N-1}{2}ln \left( 1-B_{2}^{2}\right) -\frac{1}{2A_{1}}Q_{1}(B_{1})-\frac{1}{2A_{2}}Q_{2}(B_{2})\nonumber
+\end{eqnarray}
 with\begin{equation}
 	\begin{aligned}
 	&Q_{k}(B_{k}) = {x_{k,1}}^{2} + \sum\limits_{i=1}^{N-1}\frac{ {x_{k,i+1}^{2} - 2x_{k,i+1}{x_i}B_{k}} +{x_i}^{2}B_{k}^{2} }{(1-B_{k}^{2})}\\
@@ -150,28 +151,31 @@ with $C$ representing an unimportant constant. $Q_{k}(B_{k})$ reveals the fundam
 \end{equation}
 We find the maximum likelihood parameters $A_{k,max}$ and $D_{max}$ by finding the roots of the first derivatives with respect to the three parameters.  The derivative with respect to $A_{k}$ results in the following two conditions:
 \begin{eqnarray}\label{partialsigma}
-	&&\left.\frac{\partial}{\partial A_{k}}\Phi\right|_{A_{k,max},D_{max}} = -\frac{N}{2A_{k,max}}
+	&&\left.\frac{\partial}{\partial A_{k}}\Phi\right|_{\substack{A_{k,max}\\D_{max}}} = -\frac{N}{2A_{k,max}}
 	+\frac{1}{2A_{k,max}^{2}}Q(B_{k,max})\\
 	&&+\frac{\partial B_{k}}{\partial A_{k}}\left.\left(\frac{B_{k,max}(N-1)}{1-B_{k,max}^2}
 	 -\frac{1}{2A_{k,max}}
 	 \frac{\partial Q(B_{k})}{\partial B_{k}}
-	 \right)\right|_{A_{k,max},D_{max}}=0
+	 \right)\right|_{\substack{A_{k,max}\\D_{max}}}=0\nonumber
 \end{eqnarray}
 with
-\begin{equation}
-	\frac{\partial}{\partial B_{k}}Q_{k}(B_{k}) =  \frac{2}{(1-B_{k}^{2})^{2}}\left(B_{k}a_{k,EP}+2B_{k}a_{k,SS}-(1+B_{k}^{2})a_{k,C}\right)
-\end{equation}
+\begin{eqnarray}
+	&&\frac{\partial}{\partial B_{k}}Q_{k}(B_{k}) =  \\
+	&&\frac{2}{(1-B_{k}^{2})^{2}}\left(B_{k}a_{k,EP}+2B_{k}a_{k,SS}-(1+B_{k}^{2})a_{k,C}\right)\nonumber
+\end{eqnarray}
 and
 \begin{equation}
 	\frac{\partial B_{k}}{\partial A_{k}} = \frac{B_{k}D\Delta t}{A_{k}^{2}}
 \end{equation}
 The derivative with respect to $D$ can be written:
 \begin{eqnarray}\label{partiald}
-	&&\left.\frac{\partial}{\partial D}\Phi\right|_{A_{k,max},D_{max}} =\\
+	&&\left.\frac{\partial}{\partial D}\Phi\right|_{\substack{A_{(1,2),max}\\D_{max}}} =\\
 	&&\left(\frac{B_{1}(N-1)}{1-B_{1}^{2}}
-	-\frac{1}{2A_{1}}\frac{\partial}{\partial B_{1}}Q_{1}(B_{1})\right)\left.\frac{\partial B_{1}}{\partial D}\right|_{A_{1,max},D_{max}}\\
+	-\frac{1}{2A_{1}}\frac{\partial}{\partial B_{1}}Q_{1}(B_{1})\right)\left.
+	\frac{\partial B_{1}}{\partial D}\right|_{\substack{A_{1,max}\\D_{max}}}\nonumber\\
 	&&+\left(\frac{B_{2}(N-1)}{1-B_{2}^{2}}
-	-\frac{1}{2A_{2}}\frac{\partial}{\partial B_{2}}Q_{2}(B_{2})\right)\left.\frac{\partial B_{2}}{\partial D}\right|_{A_{2,max},D_{max}}=0
+	-\frac{1}{2A_{2}}\frac{\partial}{\partial B_{2}}Q_{2}(B_{2})\right)\left.
+	\frac{\partial B_{2}}{\partial D}\right|_{\substack{A_{2,max}\\D_{max}}}=0\nonumber
 \end{eqnarray}
 with
 \begin{equation}
@@ -179,38 +183,40 @@ with
 \end{equation}
 From these three equations we need to find $A_{1}$,$A_{2}$ and $D$, which can be done using numerical root finding algorithms that are implemented in standard numerical libraries (e.g. Powell hybrid method implemented in MINPACK \cite{osti_6997568}).  In order to estimate the parameter uncertainties, we need to calculate the Jacobian.  Here the only non-zero terms are: 
 
-\begin{equation}
-	\begin{aligned}
-		\frac{\partial^{2}}{\partial A_{k}^2}\Phi &= \frac{N}{2A_{k}^{2}} - \frac{Q_{k}(B_{k})}{A_{k}^{3}}
+\begin{eqnarray}
+		&&\frac{\partial^{2}}{\partial A_{k}^2}\Phi = \frac{N}{2A_{k}^{2}} - \frac{Q_{k}(B_{k})}{A_{k}^{3}}\\
+		&&+ \frac{N-1}{1-B_{k}^{2}}\left(B_{k}\frac{\partial^{2} B_{k}}{\partial A_{k}^{2}}
+		+ \left(\frac{\partial B_{k}}{\partial A_{k}}\right)^{2}
+		\frac{1+B_{k}^{2}}{1-B_{k}^{2}}\right)\nonumber\\
+		&&-\frac{1}{2A_{k}}\frac{\partial^{2}Q_{k}(B_{k})}{\partial A_{k}^{2}}
+		+\frac{1}{A_{k}^{2}}\frac{\partial Q_{k}(B_{k})}{\partial A_{k}}\nonumber\\
+		&&=-\frac{N}{2A_{k}^{2}}
 		+ \frac{N-1}{1-B_{k}^{2}}\left(B_{k}\frac{\partial^{2} B_{k}}{\partial A_{k}^{2}}
 		+ \left(\frac{\partial B_{k}}{\partial A_{k}}\right)^{2}
-		\frac{1+B_{k}^{2}}{1-B_{k}^{2}}\right)
-		-\frac{1}{2A_{k}}\frac{\partial^{2}Q_{k}(B_{k})}{\partial A_{k}^{2}}
-		+\frac{1}{A_{k}^{2}}\frac{\partial Q_{k}(B_{k})}{\partial A_{k}}\\
-		&=-\frac{N}{2A_{k}^{2}}
-		+ \frac{N-1}{1-B_{k}^{2}}\left(B_{k}\frac{\partial^{2} B_{k}}{\partial A_{k}^{2}}
-		+ \left(\frac{\partial B_{k}}{\partial A_{k}}\right)^{2}
-		\frac{1+B_{k}^{2}}{1-B_{k}^{2}}+\frac{2B_{k}}{A_{k}}\frac{\partial B_{k}}{\partial A_{k}}\right)
-		-\frac{1}{2A_{k}}\frac{\partial^{2}Q_{k}(B_{k})}{\partial A_{k}^{2}}\\
-		\frac{\partial^{2}}{\partial A_{k}\partial D}\Phi &= \frac{1}{2A_{k}^{2}}\frac{\partial Q_{k}(B_{k})}{\partial D}
-		-\frac{1}{2A_{k}}\frac{\partial^{2} Q_{k}(B_{k})}{\partial A_{k}\partial D}
-		+ \frac{N-1}{1-B_{k}^{2}}\left(B_{k}\frac{\partial^{2} B_{k}}{\partial A_{k}\partial D}
+		\frac{1+B_{k}^{2}}{1-B_{k}^{2}}+\frac{2B_{k}}{A_{k}}\frac{\partial B_{k}}{\partial A_{k}}\right)\nonumber\\
+		&&-\frac{1}{2A_{k}}\frac{\partial^{2}Q_{k}(B_{k})}{\partial A_{k}^{2}}\nonumber
+\end{eqnarray}
+\begin{eqnarray}
+		&&\frac{\partial^{2}}{\partial A_{k}\partial D}\Phi = \frac{1}{2A_{k}^{2}}\frac{\partial Q_{k}(B_{k})}{\partial D}
+		-\frac{1}{2A_{k}}\frac{\partial^{2} Q_{k}(B_{k})}{\partial A_{k}\partial D}\\
+		&&+ \frac{N-1}{1-B_{k}^{2}}\left(B_{k}\frac{\partial^{2} B_{k}}{\partial A_{k}\partial D}
 		+ \frac{\partial B_{k}}{\partial A_{k}}\frac{\partial B_{k}}{\partial D}
 		\frac{1+B_{k}^{2}}{1-B_{k}^{2}}
-		\right)\\
-		\frac{\partial^{2}}{\partial D^2}\Phi &=
+		\right)\nonumber
+\end{eqnarray}
+\begin{eqnarray}
+		&&\frac{\partial^{2}}{\partial D^2}\Phi =
 		\frac{N-1}{1-B_{1}^{2}}\left(B_{1}\frac{\partial^{2} B_{1}}{\partial D^{2}}
 		+ \left(\frac{\partial B_{1}}{\partial D_{k}}\right)^{2}
 		\frac{1+B_{k}^{2}}{1-B_{k}^{2}}
-		\right)
-		+\frac{N-1}{1-B_{2}^{2}}\left(B_{2}\frac{\partial^{2} B_{2}}{\partial D^{2}}
+		\right)\nonumber\\
+		&&+\frac{N-1}{1-B_{2}^{2}}\left(B_{2}\frac{\partial^{2} B_{2}}{\partial D^{2}}
 		+ \left(\frac{\partial B_{2}}{\partial D}\right)^{2}
 		\frac{1+B_{k}^{2}}{1-B_{k}^{2}}
-		\right)\\
-		&- \frac{1}{2A_{1}}\frac{\partial^{2}Q_{1}(B_{1})}{\partial D^{2}}
-		- \frac{1}{2A_{2}}\frac{\partial^{2}Q_{2}(B_{2})}{\partial D^{2}}
-	\end{aligned}
-\end{equation}
+		\right)\nonumber\\
+		&&- \frac{1}{2A_{1}}\frac{\partial^{2}Q_{1}(B_{1})}{\partial D^{2}}
+		- \frac{1}{2A_{2}}\frac{\partial^{2}Q_{2}(B_{2})}{\partial D^{2}}\nonumber
+\end{eqnarray}
 with
 \begin{equation}
 	\begin{aligned}
@@ -247,22 +253,20 @@ whose negative inverse determines the parameter's covariance matrix $C = -H^{-1}
 	\end{aligned}
 \end{equation}
 From this, we can express the Hessian using the following second derivatives:
-\begin{equation}\label{eqNinfty}
-	\begin{aligned}
-		\frac{\partial^{2}}{\partial A_{k}^2}\Phi &= -\frac{N}{2A_{k}^{2}} 
-		- \frac{N}{(1-B_{k}^{2})^{2}}\left(\frac{\partial B_{k}}{\partial A_{k}}\right)^{2}
-		\left(1+B_{k}^{2}+\frac{6B_{k}}{1+B_{k}}\right)+\frac{2NB_{k}}{A_{k}(1-B_{k}^{2})}\frac{\partial B_{k}}{\partial A_{k}}\\
-		\frac{\partial^{2}}{\partial A_{k}\partial D}\Phi &=
-		\frac{NB_{k}}{A_{k}(1-B_{k}^{2})}\frac{\partial B_{k}}{\partial D}
-		-\frac{N}{(1-B_{k}^{2})^{2}}\frac{\partial B_{k}}{\partial A_{k}}\frac{\partial B_{k}}{\partial D}
-		\left(1+B_{k}^{2}+\frac{6B_{k}}{1+B_{k}}\right)\\
-		\frac{\partial^{2}}{\partial D^2}\Phi &=
+\begin{eqnarray}\label{eqNinfty}
+		&&\frac{\partial^{2}}{\partial A_{k}^2}\Phi = -\frac{N}{2A_{k}^{2}} +\frac{2NB_{k}}{A_{k}(1-B_{k}^{2})}\frac{\partial B_{k}}{\partial A_{k}}\\
+		&&- \frac{N}{(1-B_{k}^{2})^{2}}\left(\frac{\partial B_{k}}{\partial A_{k}}\right)^{2}
+		\left(1+B_{k}^{2}+\frac{6B_{k}}{1+B_{k}}\right)\nonumber\\
+		&&\frac{\partial^{2}}{\partial A_{k}\partial D}\Phi =
+		\frac{NB_{k}}{A_{k}(1-B_{k}^{2})}\frac{\partial B_{k}}{\partial D}\nonumber\\
+		&&-\frac{N}{(1-B_{k}^{2})^{2}}\frac{\partial B_{k}}{\partial A_{k}}\frac{\partial B_{k}}{\partial D}
+		\left(1+B_{k}^{2}+\frac{6B_{k}}{1+B_{k}}\right)\nonumber\\
+		&&\frac{\partial^{2}}{\partial D^2}\Phi =
 		- \frac{N}{(1-B_{1}^{2})^{2}}\left(\frac{\partial B_{1}}{\partial D}\right)^{2}
-		\left(1+B_{1}^{2}+\frac{6B_{1}}{1+B_{1}}\right)
-		- \frac{N}{(1-B_{2}^{2})^{2}}\left(\frac{\partial B_{2}}{\partial D}\right)^{2}
-		\left(1+B_{2}^{2}+\frac{6B_{2}}{1+B_{2}}\right)\\
-	\end{aligned}
-\end{equation}
+		\left(1+B_{1}^{2}+\frac{6B_{1}}{1+B_{1}}\right)\nonumber\\
+		&&- \frac{N}{(1-B_{2}^{2})^{2}}\left(\frac{\partial B_{2}}{\partial D}\right)^{2}
+		\left(1+B_{2}^{2}+\frac{6B_{2}}{1+B_{2}}\right)\nonumber
+\end{eqnarray}
 These equations allow us to express how the uncertainties/errors of the parameters depend on the sampling interval $\Delta t/\tau$ given that we measure $N$ samples.  In Fig. \ref{fig:error_fig} we plot the relative errors of $A_{1},A_{2}$ and $C$ as a function of $\Delta t/\tau_{1}$ and $\rho$ for large fixed $N$ ($N=10^{6}$) using eqs. \ref{eqNinfty}.  For example, in Fig.\ref{fig:error_A} we can see that the optimal sampling interval as given by $\Delta t/\tau_{1}$ is reducing as $\rho$ is increasing.  This is most likely due to the fact that the relaxation $\tau_{2}$ is decreasing as $\rho$ is increasing which will affect the uncertainty of both $A_{1}$ and $A_{2}$.  We also observe a shift in behavior for larger $\rho>0.25$ where no minimum $\Delta t/\tau_{1}$ for $A_{1}$ and $C$ exists.  This is in contrast to our finding for a single OU process \cite{RN91} where the relaxation time $\tau$ had a minimum of approximatly $\Delta t = 0.7\tau$ and $dA$ continuously decreased as $\Delta t/\tau$ decreased.
 \begin{figure}[H]
     \centering
@@ -283,7 +287,7 @@ These equations allow us to express how the uncertainties/errors of the paramete
 The ML method described above involves a root finding algorithm that requires starting values and could potentially have several solutions.  If one is mostly interested in estimating the coupling coefficient $C$ and its confidence interval a simpler approach could be practical.  When estimating the ML solution we take the derivative with respect to $D$ resulting in Eq. \ref{partiald}, which has two parts.  If we assume that each part is zero, we decouple the problem into two independent OU processes and we can use our previous method \cite{RN91} to estimate $A_1$ and $A_2$ and then use eq. \ref{Crho} to estimate $C$ and use $dA_1$ and $dA_2$ to estimate $dC$.  This method would not assume that the diffusion coefficient of both processes are the same, but it would still result in a robust estimation of $C$.
 \subsection{Validation by Simulation}
 In this section, we create artifical correlated time-series employing the method mentioned in \ref{sec_CO} to validate our Maximum-Likelihood method against parameter estimation by Markov-Chain Monte-Carlo (MCMC) methods \cite{RN46}.  Probabilistic calculations using MCMC were carried out in python and Julia, using the Anaconda distribution of python \cite{anaconda} with PYMC3 \cite{RN75} and Julia 1.53 \cite{bezanson2017julia} with Turing.jl \cite{ge2018t}.  For the following table and figures, we created 400 correlated time-series pairs for Pearson Correlation coefficients of $0.9$, $0.5$, $0.25$, and $0.1$ for $N=1000$ at $D=1,A_{1}=1,\Delta t = 0.3$.  Since the problem is symmetric with respect to the sign of the correlation coefficient we don't need to simulate negative correlation coefficients. Fig. \ref{fig:Arho05} shows the proability distributions of $A_1$ and $A_2$ for $N=1000$ and $\rho=0.5$ estimated by maximum likelihood (ML) and Markov-Chain Monte-Carlo (MCMC). The results of the simulations are summarized in Table \ref{simtable}.  In terms of uncertainties we find that MCMC correctly estimates parameter uncertainties consistent with the distribution over a large sample, but that the maximum likelihood method underestimates the uncertainty by a constant factor that depends on the degree of correlation $\rho$ or $C$. In Fig. \ref{fig:Acorr} we show using a scatter plot that the individual uncertainties of MCMC and ML are correlated.  This fact is important since MCMC is much more computationally expensive.  For large datasets, we can use the maximum likelihood method to run over the whole dataset, and then we can use MCMC on a few samples to determine the factor by which the ML method underestimates the uncertainties.  In our example, maximum likelihood underestimates the uncertainties by a factor of 1.5-2 over a wide range of $\rho$.  We believe this underestimation results from the fact that the distributions in Fig. \ref{fig:Arho05} are not Gaussian.  The ML method assumes that all posterior distributions are Gaussian and that the width can be determined by the second derivative of the log likelihood.  This is clearly not the case.  The fact that we underestimate the uncertainties indicates that the curvature of our distribution at the maximum is greater than a corresponding Gaussian distribution.
-\begin{table}
+\begin{table*}
 \begin{tabular}{l|c|c|c|c|c|c|c|c}
 	\hline
 	$\rho$     & $A_1$ (MCMC) & $A_1$ (ML) & $A_2$ (MCMC) & $A_2$ (ML) & $C$ (MCMC) &  $C$ (ML) & $dC$ (MCMC) &  $dC$ (ML)\\
@@ -297,20 +301,18 @@ In this section, we create artifical correlated time-series employing the method
 \end{tabular}
 \caption{Comparison of parameter estimates using maximum likelihood and Markov-Chain Monte-Carlo methods for different $\rho$ at $D=1,A_{1}=1,\Delta t = 0.3,N=1000$}
 \label{simtable}
-\end{table}
+\end{table*}
 
 \begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.4\textwidth}
         \includegraphics[width=\textwidth]{A1kde05.png}
-        \caption{$p(A_{1})$ vs $A_1$}
         \label{fig:A1rho05}
     \end{subfigure}
     ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
       %(or a blank line to force the subfigure onto a new line)
     \begin{subfigure}[b]{0.4\textwidth}
         \includegraphics[width=\textwidth]{A2kde05.png}
-        \caption{$p(A_{2})$ vs $A_2$}
         \label{fig:A2rho05}
     \end{subfigure}
     \caption{Comparison of MCMC and maximum likelihood for $\rho=0.5$ and $D=1,A_{1}=1,\Delta t = 0.3,N=1000$.  The vertical bar indicates the true expected value}\label{fig:Arho05}
@@ -319,58 +321,54 @@ In this section, we create artifical correlated time-series employing the method
     \centering
     \begin{subfigure}[b]{0.4\textwidth}
         \includegraphics[width=\textwidth]{dA1corrkde05.png}
-        \caption{$dA_{1,ML}$ vs $dA_{1,MCMC}$}
         \label{fig:A1corr}
     \end{subfigure}
     ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
       %(or a blank line to force the subfigure onto a new line)
     \begin{subfigure}[b]{0.4\textwidth}
         \includegraphics[width=\textwidth]{dA2corrkde05.png}
-        \caption{$dA_{2,ML}$ vs $dA_{2,MCMC}$}
         \label{fig:A2corr}
     \end{subfigure}
     \caption{Correlation between the uncertainties of A estimated by maximum likelihood and MCMC for $\rho=0.5$ and $D=1,A_{1}=1,\Delta t = 0.3,N=1000$.  The dotted line represents a linear fit.  For this $\rho$ the maximum likelihood underestimates the errors by a factor of 2}\label{fig:Acorr}
 \end{figure}
-In addition, we tested our simplified ML method that estimates $A_1$ and $A_2$ using \cite{RN91} using the same simulated dataset.  Both the amplitudes as well as the coupling coefficents and their confidence intervals correlate extremely well with the ones from the full ML method (Pearson correlations are >0.98), which makes this method a robust and attractive tool for estimating coupling coefficients for time-series with exponential autocorrelations.
+In addition, we tested our simplified ML method that estimates $A_1$ and $A_2$ using \cite{RN91} using the same simulated dataset.  Both the amplitudes as well as the coupling coefficents and their confidence intervals correlate extremely well with the ones from the full ML method (Pearson correlations are $\rho>0.98$), which makes this method a robust and attractive tool for estimating coupling coefficients for time-series with exponential autocorrelations.
 \subsection{Application to resting-state functional Magnetic Resonance Imaging}
 To illustrate our correlation method's power, we analyzed functional Magnetic Resonance Imaging (fMRI) time-series data from control 7T-fMRI resting-state experiments that we took from \cite{RN98}.  We extracted neural activation time-series from four brain regions that make up the default mode network \cite{RN99} ( LLP = left lateral parietal cortex, RLP = right lateral parietal cortex, MPFC = medial prefrontal cortex, PCC = posterior cingulate cortex).  The default mode network activates when individuals are focused on their internal mental-state processes, such as self-referential processing, interoception etc. and not performing a specific task.  Fig. \ref{fig:subject4} shows the time series of a single subject.  Traditionally, correlations between brain regions are evaluated using Pearson correlation coefficients.  To ensure that our coupled OU model is applicable, we determined the skewness and kurtosis of all time-series to show that they are Gaussian.  None of the distributions had an absolute value of skewness/kurtosis of more than $0.5$, which is considered safe for applying Gaussian statistics (see for example \cite{RN100}).  Next, we have to show that the time series exhibit an exponentially decaying autocorrelation function.  For this, we applied our maximum likelihood method for OU processes to determine the relaxation times for all time-series.  We found that $\tau_{MPFC}=4.8 \pm 0.7 sec$, $\tau_{PCC}=4.8 \pm 0.7 sec$, $\tau_{RLP}=4.1 \pm 0.5 sec$, $\tau_{LLP}=3.8 \pm 0.5 sec$.  The decay-times of all brain regions are within one or two standard deviations of each other, justifying the assumption made in eq. \ref{eq_decoupled}.
 Fig. \ref{fig:coupling_coef} shows the coupling coefficients of five subjects estimated by our method.  Here we show the estimates from MCMC, but we obtain the same mean values using the maximum likelihood method with uncertainties about a factor of 3 smaller than the MCMC estimates (see the Discussion in Simulation section).  We chose four of the six possible pairings between brain regions to illustrate the additional information that our method provides over Pearson correlations.  By obtaining the strength of the coupling and their confidence intervals given the data, we can distinguish between variance due to measurement error and variance due to differences between subjects.  To make this more quantitative, we propose a simple model that assumes that the coupling coefficients are sampled from a Normal distribution with a population mean $C_{P}$ with standard deviation $dC_P$.  These two parameters are derived from the data which consists of samples of $\{C_{1},\dots,C_{N}\}$ and their standard deviations (measurement errors) $\{dC_{1},\dots,dC_{N}\}$.  The posterior with uniform priors of such a hierarchal model can be written as:
-\begin{equation}
+\begin{eqnarray}
 	\label{population}
-	P(C_{P},dC_{P}|\{C_{1},\dots,C_{N}\},\{dC_{1},\dots,dC_{N}\}) \propto \prod_{i=1}^{N} \int \mathcal{N}(\tilde{C},\mu = C_{P},\sigma = dC_{P})\mathcal{N}(C_{i},\mu = \tilde{C},\sigma = dC_{i})d\tilde{C}
-\end{equation}
+	&&P(C_{P},dC_{P}|\{C_{1},\dots,C_{N}\},\{dC_{1},\dots,dC_{N}\}) \propto \\
+	&&\prod_{i=1}^{N} \int \mathcal{N}(\tilde{C},\mu = C_{P},\sigma = dC_{P})\mathcal{N}(C_{i},\mu = \tilde{C},\sigma = dC_{i})d\tilde{C}\nonumber
+\end{eqnarray}
 where for each data point we convolve the effect of the population variation with the measurement error.  To estimate the population variation, we again employed MCMC using the PYMC3 python package.  The results are summerized in Fig. \ref{fig:coupling_coef}. It plots the coupling strength and its measurement error for each subject.  The last two columns are mean of the most likely coupling coefficients and the resulting standard deviation.  The last column is the result of eq. \ref{population} and describes the mean and standard deviation of the population's coupling coefficient given the measured coupling coefficients and their confidence intervals.   Panel (a) illustrates a case where the measurement errors are smaller than the variance of the mean.  In this case, this is due to an outlier.  Here a traditional analysis would have easily detected the outlier.  In Panel (b) and (d), the variance of the mean is comparable to the variances of the individual data points.  Since we know each measurement's uncertainty, we can determine how much of the variance of the mean is due to the variance between subjects and measurement error.  Panel (c) illustrates a case where the measurement's uncertainty is larger than the variance of the mean.
 
 \begin{figure}[H]
 \begin{center}
-\resizebox{.8\textwidth}{!}{%
-\includegraphics[height=10cm]{subject4.png}%
+\resizebox{.4\textwidth}{!}{%
+\includegraphics[height=3cm]{subject4.png}%
 }
 \caption{Time series of fMRI-BOLD signals of four brain regions that constitute the default mode network ( LLP = left lateral parietal cortex, RLP = right lateral parietal cortex, MPFC = medial prefrontal cortex, PCC = posterior cingulate cortex) }\label{fig:subject4}
 \end{center}
 \end{figure}
+
 \begin{figure}[H]
     \centering
-    \begin{subfigure}[b]{0.4\textwidth}
+    \begin{subfigure}[b]{0.3\textwidth}
         \includegraphics[width=\textwidth]{mpfc_llpMCMCPV.png}
-        \caption{Coupling coefficients between MPFC and LLP}
         \label{fig:mpfc_llp}
     \end{subfigure}
     ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc. 
       %(or a blank line to force the subfigure onto a new line)
-    \begin{subfigure}[b]{0.4\textwidth}
+    \begin{subfigure}[b]{0.3\textwidth}
         \includegraphics[width=\textwidth]{mpfc_pccMCMCPV.png}
-        \caption{Coupling coefficients between MPFC and PCC}
         \label{fig:mpfc_pcc}
     \end{subfigure}
-    \begin{subfigure}[b]{0.4\textwidth}
+    \begin{subfigure}[b]{0.3\textwidth}
         \includegraphics[width=\textwidth]{pcc_llpMCMCPV.png}
-        \caption{Coupling coefficients between PCC and LLP}
         \label{fig:llp_pcc}
     \end{subfigure}
-    \begin{subfigure}[b]{0.4\textwidth}
+    \begin{subfigure}[b]{0.3\textwidth}
         \includegraphics[width=\textwidth]{rlp_llpMCMCPV.png}
-        \caption{Coupling coefficients between LLP and RLP}
         \label{fig:rlp_llp}
     \end{subfigure}
 	\caption{Coupling coefficients between default mode network brain regions across several subjects and the population average as calculated by the mean and standard deviation of the individual means of the coupling strength.  The last column gives the result of a Bayesian analysis of the population variance.  The dots indicate the mean and the black bar indicates one standard deviation in each direction.  For comparison to Pearson correlation coefficients we can use $\rho = C/(2+C)$ ($\rho=1/3$ for $C=1$, $\rho=0.6$ for $C=3$,  and $\rho=0.75$ for $C=6$).  The coupling coefficients and their uncertainties were determined by MCMC.  We obtained the same mean coupling coefficients using the maximum likelihood method but with uncertainties that are about a factor of 3 smaller than the MCMC estimate.}\label{fig:coupling_coef}
